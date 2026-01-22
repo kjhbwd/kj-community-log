@@ -11,33 +11,47 @@
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
         .river-gradient-text { background: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
+        .pulse-icon { width: 8px; height: 8px; background-color: #3b82f6; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
     </style>
 </head>
 <body>
 
     <nav class="sticky top-0 z-50 glass-panel border-b border-slate-800 p-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div class="flex flex-col">
-                <span class="text-xl font-black tracking-tighter river-gradient-text uppercase">River Global Registry</span>
-                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">성장 기록 일지</span>
+            <div class="flex items-center gap-3">
+                <div class="pulse-icon"></div>
+                <div class="flex flex-col">
+                    <span class="text-xl font-black tracking-tighter river-gradient-text uppercase">River Global Registry</span>
+                    <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">Official Community Log</span>
+                </div>
             </div>
-            <a href="https://x.com/kjhbwd" target="_blank" class="flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-700 rounded-xl">
-                <span class="text-[10px] text-slate-500 font-bold uppercase">Architect</span>
-                <span class="text-xs font-bold text-blue-400">kjhbwd</span>
+            <a href="https://x.com/kjhbwd" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl hover:border-blue-500 transition-all group">
+                <div class="text-right hidden md:block">
+                    <p class="text-[9px] text-slate-500 font-bold uppercase">Architect</p>
+                    <p class="text-xs font-bold text-white group-hover:text-blue-400">kjhbwd</p>
+                </div>
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white">K</div>
             </a>
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto py-16 px-6">
-        <header class="text-center mb-12">
-            <h1 class="text-4xl md:text-6xl font-black mb-4">전 세계 River 유저들과 <br><span class="river-gradient-text">함께 성장하세요</span></h1>
+    <main class="max-w-4xl mx-auto py-20 px-6">
+        <header class="text-center mb-16">
+            <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tight">
+                River PTS <br><span class="river-gradient-text">성장 기록 일지</span>
+            </h1>
+            <p class="text-slate-400 text-lg max-w-xl mx-auto leading-relaxed">
+                전 세계 유저들과 교류하고 당신의 기여를 증명하세요. <br>
+                입력된 정보는 글로벌 프로젝트 명부에 영구 기록됩니다.
+            </p>
         </header>
 
-        <div class="glass-panel rounded-3xl p-8 mb-12 shadow-2xl">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <input id="userName" type="text" placeholder="이름 (Name)" class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none">
-                <input id="userXId" type="text" placeholder="X ID (@username)" class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none">
-                <select id="userCountry" class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-400 outline-none">
+        <div class="glass-panel rounded-3xl p-8 mb-16 shadow-2xl">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <input id="userName" type="text" placeholder="성함 또는 닉네임" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 text-white outline-none focus:border-blue-500 transition">
+                <input id="userXId" type="text" placeholder="X ID (@아이디)" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 text-white outline-none focus:border-blue-500 transition">
+                <select id="userCountry" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 text-slate-400 outline-none focus:border-blue-500 transition">
                     <option value="KR">🇰🇷 Korea</option>
                     <option value="US">🇺🇸 USA</option>
                     <option value="CN">🇨🇳 China</option>
@@ -45,61 +59,93 @@
                     <option value="VN">🇻🇳 Vietnam</option>
                 </select>
             </div>
-            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest">
-                일지에 기록하기 (REGISTER)
+            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-blue-900/40 uppercase tracking-widest">
+                일지에 기록 남기기 (Submit Growth)
             </button>
         </div>
 
-        <div class="glass-panel rounded-3xl overflow-hidden">
+        <div class="flex justify-between items-center mb-8 px-2">
+            <h2 class="text-2xl font-black italic uppercase tracking-tighter">Live Log</h2>
+            <div id="memberCount" class="bg-blue-900/30 px-3 py-1 rounded text-blue-400 border border-blue-900/50 text-xs font-bold">Total: 0</div>
+        </div>
+
+        <div class="glass-panel rounded-3xl overflow-hidden shadow-2xl">
             <table class="w-full text-left">
-                <thead class="bg-slate-900/80 text-slate-500 text-[10px] font-black uppercase border-b border-slate-800">
+                <thead class="bg-slate-900/80 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-slate-800">
                     <tr>
                         <th class="p-6">No.</th>
-                        <th class="p-6">Member</th>
+                        <th class="p-6">Identity</th>
                         <th class="p-6">Country</th>
-                        <th class="p-6 text-right">Link</th>
+                        <th class="p-6 text-right">Verification</th>
                     </tr>
                 </thead>
-                <tbody id="userTableBody" class="divide-y divide-slate-800/50"></tbody>
+                <tbody id="userTableBody" class="divide-y divide-slate-800/50 text-sm">
+                    </tbody>
             </table>
         </div>
     </main>
 
     <script>
-        const SUPABASE_URL = 'YOUR_PROJECT_URL'; // 실제 URL 입력
-        const SUPABASE_KEY = 'YOUR_ANON_KEY';    // 실제 Key 입력
+        // 확인하신 Supabase 정보를 입력했습니다.
+        const SUPABASE_URL = 'https://xheuxdsbwcueutukeblm.supabase.co'; 
+        const SUPABASE_KEY = '이미지에_있던_긴_sb_publishable_키를_여기에_붙여넣으세요'; 
+
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function fetchUsers() {
-            const { data, error } = await supabaseClient.from('river_members').select('*').order('id', { ascending: false });
+            const { data, error } = await supabaseClient
+                .from('river_members')
+                .select('*')
+                .order('id', { ascending: false });
             if (!error) renderTable(data);
         }
 
         function renderTable(users) {
             const tableBody = document.getElementById('userTableBody');
-            tableBody.innerHTML = '';
             const flags = { KR:'🇰🇷', US:'🇺🇸', CN:'🇨🇳', JP:'🇯🇵', VN:'🇻🇳' };
+            tableBody.innerHTML = '';
             users.forEach((user, index) => {
                 const row = document.createElement('tr');
-                row.className = "hover:bg-slate-800/30 transition-colors";
+                row.className = "hover:bg-slate-800/30 transition-colors group";
                 row.innerHTML = `
-                    <td class="p-6 font-mono text-blue-500 text-sm">#${String(users.length - index).padStart(3, '0')}</td>
-                    <td class="p-6 font-bold text-slate-200">${user.name} <span class="text-[10px] text-slate-500 font-normal ml-2">@${user.x_id}</span></td>
-                    <td class="p-6 text-lg">${flags[user.country] || '🌐'}</td>
-                    <td class="p-6 text-right"><a href="https://x.com/${user.x_id}" target="_blank" class="bg-white text-black text-[10px] font-black px-4 py-2 rounded-lg uppercase">View X</a></td>
+                    <td class="p-6 font-mono text-blue-500/70 italic">#${String(users.length - index).padStart(3, '0')}</td>
+                    <td class="p-6">
+                        <div class="font-black text-slate-200">${user.name}</div>
+                        <div class="text-[10px] text-slate-500">@${user.x_id}</div>
+                    </td>
+                    <td class="p-6 text-xl">${flags[user.country] || '🌐'}</td>
+                    <td class="p-6 text-right">
+                        <a href="https://x.com/${user.x_id}" target="_blank" class="inline-block border border-slate-700 hover:bg-blue-600 hover:border-blue-600 text-white text-[10px] font-black px-5 py-2 rounded-xl transition-all uppercase">Verify</a>
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });
+            document.getElementById('memberCount').innerText = `Total Members: ${users.length}`;
         }
 
         async function saveUser() {
-            const name = document.getElementById('userName').value;
-            const xInput = document.getElementById('userXId').value.trim().replace('@', '');
-            const country = document.getElementById('userCountry').value;
-            if (name && xInput) {
-                await supabaseClient.from('river_members').insert([{ name, x_id: xInput, country }]);
-                document.getElementById('userName').value = ''; document.getElementById('userXId').value = '';
-                fetchUsers();
+            const nameInput = document.getElementById('userName');
+            const xInput = document.getElementById('userXId');
+            const countryInput = document.getElementById('userCountry');
+            const btn = document.getElementById('btnSubmit');
+
+            const xId = xInput.value.trim().replace('@', '');
+
+            if (nameInput.value && xId) {
+                btn.innerText = "RECORDING...";
+                const { error } = await supabaseClient
+                    .from('river_members')
+                    .insert([{ name: nameInput.value, x_id: xId, country: countryInput.value }]);
+
+                if (!error) {
+                    nameInput.value = ''; xInput.value = '';
+                    fetchUsers();
+                } else {
+                    alert("오류가 발생했습니다: " + error.message);
+                }
+                btn.innerText = "일지에 기록 남기기 (Submit Growth)";
+            } else {
+                alert("이름과 X 아이디를 모두 입력해주세요.");
             }
         }
         fetchUsers();
