@@ -11,6 +11,8 @@
         .box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
         input, select { background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 10px; color: white; width: 100%; outline: none; }
         input:focus { border-color: #6366f1; }
+        /* 비밀번호 입력칸 강조 스타일 */
+        .pass-input { border: 2px solid #4f46e5; background: #1e1b4b; }
     </style>
 </head>
 <body class="p-6">
@@ -18,7 +20,7 @@
     <div class="max-w-2xl mx-auto">
         <header class="mb-8 text-center">
             <h1 class="text-3xl font-bold mb-2">Daily Activity Note</h1>
-            <p class="text-slate-400">오늘의 활동을 간단히 기록하고 보관하세요.</p>
+            <p class="text-slate-400">커뮤니티 전용 보안 기록장입니다.</p>
         </header>
 
         <div class="box mb-8 shadow-2xl">
@@ -30,9 +32,11 @@
                     <option value="US">USA</option>
                     <option value="CN">China</option>
                     <option value="JP">Japan</option>
+                    <option value="VN">Vietnam</option>
                 </select>
+                <input id="passCode" type="password" placeholder="커뮤니티 암호를 입력하세요 (2126)" class="pass-input">
             </div>
-            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-indigo-600 py-4 rounded-xl font-black hover:bg-indigo-500 transition-all uppercase tracking-widest">
+            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-indigo-600 py-4 rounded-xl font-black hover:bg-indigo-500 transition-all uppercase tracking-widest shadow-lg shadow-indigo-900/40">
                 기록 저장하기 (Save Note)
             </button>
         </div>
@@ -48,7 +52,7 @@
                     <tr>
                         <th class="pb-3 px-2">No.</th>
                         <th class="pb-3 px-2">User</th>
-                        <th class="pb-3 px-2">Loc</th>
+                        <th class="pb-3 px-2 text-center">Loc</th>
                         <th class="pb-3 px-2 text-right">Link</th>
                     </tr>
                 </thead>
@@ -59,78 +63,31 @@
     </div>
 
     <script>
-        // 이미지에서 확인된 수파베이스 연결 정보
+        // Supabase 연결 정보
         const SUPABASE_URL = 'https://xheuxdsbwcueutukeblm.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_TW6tF_10D5-zv5FdXZE87g_8sNPZmuF'; 
+        
+        // 요청하신 비밀번호 설정
+        const PRIVATE_CODE = '2126'; 
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 1. 데이터 불러오기 함수
+        // 데이터 불러오기
         async function fetchUsers() {
             const { data, error } = await supabaseClient
-                .from('river_members') // 테이블 이름 확인됨
+                .from('river_members') //
                 .select('*')
                 .order('id', { ascending: false });
             if (!error) renderTable(data);
         }
 
-        // 2. 테이블 렌더링 함수
+        // 테이블 렌더링
         function renderTable(users) {
             const tableBody = document.getElementById('userTableBody');
+            const flags = { KR:'🇰🇷', US:'🇺🇸', CN:'🇨🇳', JP:'🇯🇵', VN:'🇻🇳' };
             tableBody.innerHTML = '';
             users.forEach((user, index) => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-800/50 transition-colors";
                 row.innerHTML = `
-                    <td class="py-4 px-2 text-indigo-500 font-mono">#${users.length - index}</td>
-                    <td class="py-4 px-2 font-medium">
-                        ${user.name}<br><span class="text-[10px] text-slate-500">@${user.x_id}</span>
-                    </td>
-                    <td class="py-4 px-2 text-lg">${user.country}</td>
-                    <td class="py-4 px-2 text-right">
-                        <a href="https://x.com/${user.x_id}" target="_blank" class="text-[10px] bg-white text-black px-2 py-1 rounded font-bold uppercase">View</a>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-            document.getElementById('memberCount').innerText = `Total: ${users.length}`;
-        }
-
-        // 3. 데이터 저장 함수
-        async function saveUser() {
-            const nameInput = document.getElementById('userName');
-            const xInput = document.getElementById('userXId');
-            const countryInput = document.getElementById('userCountry');
-            const btn = document.getElementById('btnSubmit');
-
-            // X 주소에서 아이디만 추출하는 로직
-            let xId = xInput.value.trim().replace('@', '').split('x.com/').pop().split('?')[0];
-
-            if (nameInput.value && xId) {
-                btn.innerText = "저장 중...";
-                btn.disabled = true;
-
-                // Supabase 테이블(river_members)에 데이터 삽입
-                const { error } = await supabaseClient
-                    .from('river_members')
-                    .insert([{ name: nameInput.value, x_id: xId, country: countryInput.value }]);
-
-                if (!error) {
-                    nameInput.value = ''; xInput.value = '';
-                    fetchUsers();
-                    alert("기록이 성공적으로 저장되었습니다!");
-                } else {
-                    alert("저장 실패: " + error.message);
-                }
-                btn.innerText = "기록 저장하기 (Save Note)";
-                btn.disabled = false;
-            } else {
-                alert("이름과 아이디를 모두 입력해주세요.");
-            }
-        }
-
-        // 초기 데이터 로드
-        fetchUsers();
-    </script>
-</body>
-</html>
+                    <td class="py-4 px-2 text-
