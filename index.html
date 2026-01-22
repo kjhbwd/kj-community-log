@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIVER LOG - Master Global Manager</title>
+    <title>RIVER LOG - Master Final 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -14,24 +14,7 @@
         .priority-row { background: rgba(99, 102, 241, 0.15); border-left: 4px solid #6366f1; }
         .tab-active { background: #4f46e5 !important; color: white !important; font-weight: 900; box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.4); }
         button:active { transform: scale(0.94); transition: 0.1s; }
-        .time-badge { font-size: 10px; color: #94a3b8; font-family: monospace; background: rgba(15, 23, 42, 0.6); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
-        
-        /* 개발자 김지호bwd 버튼 스타일 */
-        .dev-neon { 
-            background: linear-gradient(45deg, #6366f1, #a855f7);
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
-            animation: dev-pulse 2s infinite;
-        }
-        @keyframes dev-pulse { 
-            0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
-        }
-
-        .clock-item { display: flex; flex-direction: column; align-items: center; min-width: 50px; line-height: 1.1; }
-        .clock-time { font-size: 10px; font-family: monospace; font-weight: bold; color: #60a5fa; }
-        .clock-label { font-size: 8px; color: #64748b; font-weight: 800; }
-        .name-link:hover { color: #60a5fa; text-decoration: underline; }
+        .dev-glow { background: linear-gradient(45deg, #6366f1, #a855f7); box-shadow: 0 0 12px rgba(147, 51, 234, 0.6); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -39,10 +22,9 @@
 
     <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 p-3">
         <div class="max-w-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
-            <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
                 <span class="font-black brand-gradient italic tracking-tighter text-xl">RIVER LOG</span>
-                
-                <a href="https://x.com/thejediworld77" target="_blank" class="dev-neon px-4 py-2 rounded-xl flex flex-col items-center leading-tight transition-transform hover:scale-105">
+                <a href="https://x.com/thejediworld77" target="_blank" class="dev-glow px-4 py-2 rounded-xl flex flex-col items-center leading-tight transition-transform hover:scale-105">
                     <span class="text-[8px] font-bold text-indigo-100 uppercase tracking-widest">Developer</span>
                     <span class="text-[11px] font-black text-white">@김지호bwd</span>
                 </a>
@@ -50,37 +32,30 @@
             
             <div class="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end">
                 <select id="langSelect" onchange="changeLanguage(this.value)" class="bg-slate-800 border border-slate-700 text-[10px] text-white rounded-lg px-2 py-1.5 outline-none">
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="en">🇺🇸 English</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                    <option value="ko">🇰🇷 한국어</option><option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option><option value="ja">🇯🇵 日本語</option><option value="vi">🇻🇳 Tiếng Việt</option>
                 </select>
-
-                <div class="flex gap-2 overflow-x-auto no-scrollbar">
-                    <div class="clock-item"><span class="clock-label">KR</span><span id="clock-KR" class="clock-time">00:00:00</span></div>
-                    <div class="clock-item"><span class="clock-label">US</span><span id="clock-US" class="clock-time">00:00:00</span></div>
-                    <div class="clock-item"><span class="clock-label">CN</span><span id="clock-CN" class="clock-time">00:00:00</span></div>
-                    <div class="clock-item"><span class="clock-label">JP</span><span id="clock-JP" class="clock-time">00:00:00</span></div>
-                    <div class="clock-item"><span class="clock-label">VN</span><span id="clock-VN" class="clock-time">00:00:00</span></div>
-                </div>
+                <div id="clockDisplay" class="flex gap-2 overflow-x-auto no-scrollbar"></div>
             </div>
         </div>
     </nav>
 
     <div class="max-w-2xl mx-auto p-4">
-        <div class="flex justify-between gap-1 mb-6 bg-slate-800/50 p-1 rounded-xl shadow-inner no-scrollbar overflow-x-auto">
-            <button onclick="switchCountry('KR')" id="tab-KR" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 transition-all font-black">KR</button>
-            <button onclick="switchCountry('US')" id="tab-US" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 transition-all font-black">US</button>
-            <button onclick="switchCountry('CN')" id="tab-CN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 transition-all font-black">CN</button>
-            <button onclick="switchCountry('JP')" id="tab-JP" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 transition-all font-black">JP</button>
-            <button onclick="switchCountry('VN')" id="tab-VN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 transition-all font-black">VN</button>
+        <div class="box mb-6 border-2 border-indigo-500/40 bg-indigo-900/10 shadow-xl">
+            <div class="flex gap-2 mb-2">
+                <input id="managerId" type="text" placeholder="원하는 ID를 정해서 입력하세요" class="flex-1 border-indigo-500/50">
+                <button onclick="saveAndConnect()" id="btnConnect" class="bg-indigo-600 px-6 rounded-lg font-black text-sm">접속</button>
+            </div>
+            <p id="txt-id-info" class="text-[11px] text-slate-400">원하는 ID를 정한 후 이웃들을 등록해주세요. 등록한 이웃들을 볼 때도 정한 ID로 불러올 수 있습니다.</p>
         </div>
 
-        <header class="mb-6 text-center">
-            <h1 class="text-2xl font-black mb-1 text-white uppercase tracking-tight"><span id="active-country-name">KOREA</span> LIST</h1>
-            <p id="txt-subtitle" class="text-slate-500 text-[10px] uppercase tracking-widest font-bold">Global Member Interaction Log</p>
-        </header>
+        <div class="flex justify-between gap-1 mb-6 bg-slate-800/50 p-1 rounded-xl no-scrollbar overflow-x-auto">
+            <button onclick="switchCountry('KR')" id="tab-KR" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">KR</button>
+            <button onclick="switchCountry('US')" id="tab-US" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">US</button>
+            <button onclick="switchCountry('CN')" id="tab-CN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">CN</button>
+            <button onclick="switchCountry('JP')" id="tab-JP" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">JP</button>
+            <button onclick="switchCountry('VN')" id="tab-VN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">VN</button>
+        </div>
 
         <div class="box mb-8 shadow-xl border border-indigo-500/10">
             <div class="grid grid-cols-1 gap-3 mb-4">
@@ -88,22 +63,13 @@
                 <input id="userXId" type="text" placeholder="X ID (@username)">
                 <input id="passCode" type="password" placeholder="비밀번호 입력" class="border-indigo-500/20">
             </div>
-            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-indigo-600 py-4 rounded-xl font-black text-white shadow-lg active:bg-indigo-700 transition-all uppercase">
-                등록하기 (SUBMIT)
-            </button>
-        </div>
-
-        <div class="flex justify-between items-center mb-4 px-1">
-            <h2 id="txt-list-title" class="font-bold text-slate-300 text-sm uppercase tracking-wider">Members</h2>
-            <span id="memberCount" class="text-[10px] text-indigo-400 font-bold bg-indigo-900/30 px-2 py-1 rounded">Total: 0</span>
+            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-indigo-600 py-4 rounded-xl font-black text-white shadow-lg uppercase tracking-wider">등록하기</button>
         </div>
 
         <div class="box p-0 overflow-hidden border-slate-800 shadow-2xl">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <tbody id="userTableBody" class="text-sm divide-y divide-slate-800"></tbody>
-                </table>
-            </div>
+            <table class="w-full text-left">
+                <tbody id="userTableBody" class="text-sm divide-y divide-slate-800"></tbody>
+            </table>
         </div>
     </div>
 
@@ -111,141 +77,105 @@
         const SUPABASE_URL = 'https://xheuxdsbwcueutukeblm.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_TW6tF_10D5-zv5FdXZE87g_8sNPZmuF'; 
         const PRIVATE_CODE = '2126';
-
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let currentCountry = 'KR';
         let currentLang = 'ko';
-
         const timeZones = { KR: 'Asia/Seoul', US: 'America/New_York', CN: 'Asia/Shanghai', JP: 'Asia/Tokyo', VN: 'Asia/Ho_Chi_Minh' };
-        
-        // 완전 다국어 사전
+
+        // 🌐 완전한 다국어 사전 (아이디/비밀번호 포함)
         const translations = {
-            ko: { subtitle: "글로벌 멤버 상호작용 기록", btn: "등록하기", namePlace: "닉네임 (Nickname)", xPlace: "X ID (@username)", passPlace: "비밀번호를 입력하세요", members: "멤버 리스트", edit: "이름 수정", del: "명단 삭제", up: "순위 올리기", down: "순위 내리기" },
-            en: { subtitle: "Global Member Interaction Log", btn: "Submit", namePlace: "Nickname", xPlace: "X ID (@username)", passPlace: "Enter Password", members: "Members List", edit: "Edit Name", del: "Delete Entry", up: "Move Up", down: "Move Down" },
-            zh: { subtitle: "全球成员互动记录", btn: "提交名单", namePlace: "昵称", xPlace: "X ID (@用户名)", passPlace: "输入密码", members: "成员名单", edit: "修改姓名", del: "删除名单", up: "提高排名", down: "降低排名" },
-            ja: { subtitle: "グローバルメンバー相互作用記録", btn: "登録する", namePlace: "ニックネーム", xPlace: "X ID (@ユーザー名)", passPlace: "パスワード入力", members: "メンバー名簿", edit: "名前修正", del: "削除", up: "順位を上げる", down: "順位を下げる" },
-            vi: { subtitle: "Ghi chép tương tác thành viên toàn cầu", btn: "Gửi danh sách", namePlace: "Biệt danh", xPlace: "X ID (@tên người dùng)", passPlace: "Nhập mật khẩu", members: "Danh sách thành viên", edit: "Sửa tên", del: "Xóa danh sách", up: "Tăng thứ hạng", down: "Giảm thứ hạng" }
+            ko: { idPlace: "원하는 ID를 정해서 입력하세요", connect: "접속", idInfo: "원하는 ID를 정한 후 이웃들을 등록해주세요. 등록한 이웃들을 볼 때도 정한 ID로 불러올 수 있습니다.", submit: "등록하기", namePlace: "닉네임 (Nickname)", xPlace: "X ID (@아이디)", passPlace: "비밀번호 입력", edit: "수정", del: "삭제", up: "위로", down: "아래로" },
+            en: { idPlace: "Enter Private ID", connect: "Connect", idInfo: "Set your ID first, then register neighbors.", submit: "SUBMIT", namePlace: "Nickname", xPlace: "X ID", passPlace: "Enter Password", edit: "Edit", del: "Delete", up: "Up", down: "Down" },
+            zh: { idPlace: "输入您的私人 ID", connect: "连接", idInfo: "先设置ID，然后注册邻居。", submit: "提交", namePlace: "昵称", xPlace: "X ID", passPlace: "输入密码", edit: "修改", del: "删除", up: "排名上升", down: "排名下降" },
+            ja: { idPlace: "管理 ID を入力してください", connect: "接続", idInfo: "最初にIDを設定してから、隣人を登録します。", submit: "登録する", namePlace: "ニックネーム", xPlace: "X ID", passPlace: "パスワード入力", edit: "修正", del: "削除", up: "上げる", down: "下げる" },
+            vi: { idPlace: "Nhập ID riêng của bạn", connect: "Kết nối", idInfo: "Đặt ID của bạn trước, sau đó đăng ký hàng xóm.", submit: "Gửi", namePlace: "Biệt danh", xPlace: "X ID", passPlace: "Nhập mật khẩu", edit: "Sửa", del: "Xóa", up: "Tăng", down: "Giảm" }
         };
 
         function changeLanguage(lang) {
             currentLang = lang;
-            const t = translations[lang];
-            document.getElementById('txt-subtitle').innerText = t.subtitle;
-            document.getElementById('btnSubmit').innerText = t.btn;
+            const t = translations[lang] || translations.en;
+            document.getElementById('managerId').placeholder = t.idPlace;
+            document.getElementById('btnConnect').innerText = t.connect;
+            document.getElementById('txt-id-info').innerText = t.idInfo;
             document.getElementById('userName').placeholder = t.namePlace;
             document.getElementById('userXId').placeholder = t.xPlace;
             document.getElementById('passCode').placeholder = t.passPlace;
-            document.getElementById('txt-list-title').innerText = t.members;
+            document.getElementById('btnSubmit').innerText = t.submit;
             fetchUsers();
         }
 
-        function updateLiveClocks() {
-            const now = new Date();
-            Object.keys(timeZones).forEach(code => {
-                const timeString = now.toLocaleTimeString('en-US', { timeZone: timeZones[code], hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-                document.getElementById(`clock-${code}`).innerText = timeString;
-            });
-        }
-        setInterval(updateLiveClocks, 1000);
-        updateLiveClocks();
+        window.onload = () => {
+            const savedId = localStorage.getItem('river_manager_id');
+            if(savedId) { document.getElementById('managerId').value = savedId; fetchUsers(); }
+            setInterval(updateLiveClocks, 1000);
+            updateLiveClocks();
+        };
 
-        function switchCountry(countryCode) {
-            currentCountry = countryCode;
-            const names = { KR:'KOREA', US:'USA', CN:'CHINA', JP:'JAPAN', VN:'VIETNAM' };
-            document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.classList.remove('tab-active'));
-            document.getElementById(`tab-${countryCode}`).classList.add('tab-active');
-            document.getElementById('active-country-name').innerText = names[countryCode];
+        function saveAndConnect() {
+            const mId = document.getElementById('managerId').value;
+            if(!mId) return;
+            localStorage.setItem('river_manager_id', mId);
             fetchUsers();
+            alert(`[${mId}] 접속 성공!`);
         }
 
         async function fetchUsers() {
-            const { data, error } = await supabaseClient.from('river_members').select('*').eq('country', currentCountry).order('priority', { ascending: false }).order('id', { ascending: false });
-            if (!error) renderTable(data);
-        }
-
-        function formatLocalTime(utcTime) {
-            if (!utcTime) return "";
-            const options = { timeZone: timeZones[currentCountry], month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
-            return new Intl.DateTimeFormat('ko-KR', options).format(new Date(utcTime));
+            const mId = document.getElementById('managerId').value;
+            if(!mId) return;
+            const { data } = await supabaseClient.from('river_members').select('*').eq('country', currentCountry).eq('manager_id', mId).order('priority', { ascending: false }).order('id', { ascending: false });
+            renderTable(data || []);
         }
 
         function renderTable(users) {
             const tableBody = document.getElementById('userTableBody');
             tableBody.innerHTML = '';
-            const t = translations[currentLang];
-
+            const t = translations[currentLang] || translations.en;
             users.forEach((user, index) => {
                 const isHigh = user.priority > 0;
-                const localTime = formatLocalTime(user.created_at);
                 const row = document.createElement('tr');
                 row.className = isHigh ? "priority-row transition-colors" : "hover:bg-slate-800/30 transition-colors";
-                row.innerHTML = `
-                    <td class="p-4 w-full">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="text-[9px] font-bold ${isHigh ? 'text-indigo-400' : 'text-slate-500'}">${isHigh ? '⭐ TOP' : '#' + (index+1)}</span>
-                                    <span class="time-badge">${localTime}</span>
-                                </div>
-                                <a href="https://x.com/${user.x_id}" target="_blank" class="name-link font-bold text-slate-100 text-base block mb-0.5 tracking-tight cursor-pointer">
-                                    ${user.name}
-                                </a>
-                                <div class="text-[10px] text-slate-500 font-mono tracking-tighter">@${user.x_id}</div>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <button onclick="adjustPriority(${user.id}, ${user.priority + 1})" title="${t.up}" class="bg-indigo-900/40 text-indigo-300 p-2 rounded-lg text-xs">🔼</button>
-                                <button onclick="adjustPriority(${user.id}, ${user.priority - 1})" title="${t.down}" class="bg-slate-800 text-slate-400 p-2 rounded-lg text-xs">🔽</button>
-                                <button onclick="editName(${user.id}, '${user.name}')" title="${t.edit}" class="bg-slate-800 text-amber-400/80 p-2 rounded-lg text-xs ml-1">📝</button>
-                                <button onclick="deleteUser(${user.id})" title="${t.del}" class="bg-red-900/10 text-red-500/80 p-2 rounded-lg text-xs ml-1">🗑️</button>
-                            </div>
-                        </div>
-                    </td>
-                `;
+                
+                // 🕒 명단 내 시간 표시 제거
+                row.innerHTML = `<td class="p-4 w-full"><div class="flex justify-between items-start"><div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-[9px] font-bold ${isHigh ? 'text-indigo-400' : 'text-slate-500'}">${isHigh ? '⭐ TOP' : '#' + (index+1)}</span></div><a href="https://x.com/${user.x_id}" target="_blank" class="font-bold text-slate-100 text-base block mb-0.5 tracking-tight cursor-pointer">${user.name}</a><div class="text-[10px] text-slate-500 font-mono tracking-tighter">@${user.x_id}</div></div><div class="flex items-center gap-1">
+                    <button onclick="adjustPriority(${user.id}, ${user.priority + 1})" title="${t.up}" class="bg-indigo-900/40 text-indigo-300 p-2 rounded-lg text-xs">🔼</button>
+                    <button onclick="adjustPriority(${user.id}, ${user.priority - 1})" title="${t.down}" class="bg-slate-800 text-slate-400 p-2 rounded-lg text-xs">🔽</button>
+                    <button onclick="editName(${user.id}, '${user.name}')" title="${t.edit}" class="bg-slate-800 text-amber-400/80 p-2 rounded-lg text-xs ml-1">📝</button>
+                    <button onclick="deleteUser(${user.id})" title="${t.del}" class="bg-red-900/10 text-red-500 p-2 rounded-lg text-xs ml-1">🗑️</button>
+                </div></div></td>`;
                 tableBody.appendChild(row);
             });
-            document.getElementById('memberCount').innerText = `Total: ${users.length}`;
+        }
+
+        async function saveUser() {
+            const mId = document.getElementById('managerId').value;
+            const name = document.getElementById('userName').value;
+            const xInput = document.getElementById('userXId').value;
+            const pass = document.getElementById('passCode').value;
+            if(!mId) { alert("ID 접속 필요"); return; }
+            if(pass !== PRIVATE_CODE) { alert("비밀번호 오류"); return; }
+            let xId = xInput.trim().replace('@', '').split('x.com/').pop().split('?')[0];
+            await supabaseClient.from('river_members').insert([{ name, x_id: xId, country: currentCountry, manager_id: mId, priority: 0 }]);
+            document.getElementById('userName').value = ''; document.getElementById('userXId').value = ''; fetchUsers();
         }
 
         async function editName(id, oldName) {
             const newName = prompt(translations[currentLang].edit + ":", oldName);
-            if (newName && newName !== oldName) {
-                const pass = prompt("관리자 비밀번호를 입력하세요.");
-                if (pass === PRIVATE_CODE) {
-                    await supabaseClient.from('river_members').update({ name: newName }).eq('id', id);
-                    fetchUsers();
-                }
-            }
+            if(newName && newName !== oldName) { await supabaseClient.from('river_members').update({ name: newName }).eq('id', id); fetchUsers(); }
         }
 
-        async function adjustPriority(id, newP) {
-            const finalP = newP < 0 ? 0 : newP;
-            await supabaseClient.from('river_members').update({ priority: finalP }).eq('id', id);
-            fetchUsers();
-        }
+        async function adjustPriority(id, newP) { await supabaseClient.from('river_members').update({ priority: newP }).eq('id', id); fetchUsers(); }
 
-        async function saveUser() {
-            const name = document.getElementById('userName').value;
-            const xInput = document.getElementById('userXId').value;
-            const pass = document.getElementById('passCode').value;
-            if (pass !== PRIVATE_CODE) { alert("비밀번호 오류"); return; }
-            let xId = xInput.trim().replace('@', '').split('x.com/').pop().split('?')[0];
-            if (name && xId) {
-                const { error } = await supabaseClient.from('river_members').insert([{ name, x_id: xId, country: currentCountry, priority: 0 }]);
-                if (!error) { 
-                    document.getElementById('userName').value = ''; document.getElementById('userXId').value = ''; document.getElementById('passCode').value = '';
-                    fetchUsers(); 
-                }
-            }
-        }
+        async function deleteUser(id) { if(confirm(translations[currentLang].del + "?")) { await supabaseClient.from('river_members').delete().eq('id', id); fetchUsers(); } }
 
-        async function deleteUser(id) {
-            const pass = prompt(translations[currentLang].del + " - 비밀번호 입력");
-            if (pass === PRIVATE_CODE) {
-                await supabaseClient.from('river_members').delete().eq('id', id);
-                fetchUsers();
-            }
+        function switchCountry(code) { currentCountry = code; document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.classList.remove('tab-active')); document.getElementById(`tab-${code}`).classList.add('tab-active'); fetchUsers(); }
+
+        function updateLiveClocks() {
+            const html = Object.keys(timeZones).map(code => {
+                const time = new Date().toLocaleTimeString('en-US', { timeZone: timeZones[code], hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                return `<div class="flex flex-col items-center min-w-[52px] leading-tight"><span class="text-[8px] text-slate-500 font-bold">${code}</span><span class="text-[10px] text-blue-400 font-mono font-bold">${time}</span></div>`;
+            }).join('');
+            document.getElementById('clockDisplay').innerHTML = html;
         }
-        switchCountry('KR');
     </script>
 </body>
 </html>
