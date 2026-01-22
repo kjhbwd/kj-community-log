@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIVER LOG - Master Final 2026</title>
+    <title>RIVER LOG - Pagination Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -16,6 +16,8 @@
         button:active { transform: scale(0.94); transition: 0.1s; }
         .dev-glow { background: linear-gradient(45deg, #6366f1, #a855f7); box-shadow: 0 0 12px rgba(147, 51, 234, 0.6); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .page-btn { background: #334155; color: #94a3b8; padding: 8px 14px; border-radius: 8px; font-weight: bold; font-size: 13px; transition: 0.2s; }
+        .page-btn.active { background: #4f46e5; color: white; }
     </style>
 </head>
 <body class="pb-10">
@@ -24,7 +26,7 @@
         <div class="max-w-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
                 <span class="font-black brand-gradient italic tracking-tighter text-xl">RIVER LOG</span>
-                <a href="https://x.com/thejediworld77" target="_blank" class="dev-glow px-4 py-2 rounded-xl flex flex-col items-center leading-tight transition-transform hover:scale-105">
+                <a href="https://x.com/thejediworld77" target="_blank" class="dev-glow px-4 py-2 rounded-xl flex flex-col items-center transition-transform hover:scale-105">
                     <span class="text-[8px] font-bold text-indigo-100 uppercase tracking-widest">Developer</span>
                     <span class="text-[11px] font-black text-white">@김지호bwd</span>
                 </a>
@@ -50,27 +52,29 @@
         </div>
 
         <div class="flex justify-between gap-1 mb-6 bg-slate-800/50 p-1 rounded-xl no-scrollbar overflow-x-auto">
-            <button onclick="switchCountry('KR')" id="tab-KR" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">KR</button>
-            <button onclick="switchCountry('US')" id="tab-US" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">US</button>
-            <button onclick="switchCountry('CN')" id="tab-CN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">CN</button>
-            <button onclick="switchCountry('JP')" id="tab-JP" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">JP</button>
-            <button onclick="switchCountry('VN')" id="tab-VN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black transition-all">VN</button>
+            <button onclick="switchCountry('KR')" id="tab-KR" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">KR</button>
+            <button onclick="switchCountry('US')" id="tab-US" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">US</button>
+            <button onclick="switchCountry('CN')" id="tab-CN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">CN</button>
+            <button onclick="switchCountry('JP')" id="tab-JP" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">JP</button>
+            <button onclick="switchCountry('VN')" id="tab-VN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">VN</button>
         </div>
 
         <div class="box mb-8 shadow-xl border border-indigo-500/10">
             <div class="grid grid-cols-1 gap-3 mb-4">
                 <input id="userName" type="text" placeholder="닉네임 (Nickname)">
-                <input id="userXId" type="text" placeholder="X ID (@username)">
+                <input id="userXId" type="text" placeholder="X ID (@아이디)">
                 <input id="passCode" type="password" placeholder="비밀번호 입력" class="border-indigo-500/20">
             </div>
-            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-indigo-600 py-4 rounded-xl font-black text-white shadow-lg uppercase tracking-wider">등록하기</button>
+            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-indigo-600 py-4 rounded-xl font-black text-white shadow-lg uppercase">등록하기</button>
         </div>
 
-        <div class="box p-0 overflow-hidden border-slate-800 shadow-2xl">
+        <div class="box p-0 overflow-hidden border-slate-800 shadow-2xl mb-4">
             <table class="w-full text-left">
                 <tbody id="userTableBody" class="text-sm divide-y divide-slate-800"></tbody>
             </table>
         </div>
+
+        <div id="pagination" class="flex justify-center gap-2 mt-6 mb-10"></div>
     </div>
 
     <script>
@@ -78,17 +82,18 @@
         const SUPABASE_KEY = 'sb_publishable_TW6tF_10D5-zv5FdXZE87g_8sNPZmuF'; 
         const PRIVATE_CODE = '2126';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
         let currentCountry = 'KR';
         let currentLang = 'ko';
+        let allUsers = []; // 전체 데이터를 담는 변수
+        let currentPage = 1;
+        const itemsPerPage = 10; // 페이지당 10명 [페이징 기능 핵심]
+
         const timeZones = { KR: 'Asia/Seoul', US: 'America/New_York', CN: 'Asia/Shanghai', JP: 'Asia/Tokyo', VN: 'Asia/Ho_Chi_Minh' };
 
-        // 🌐 완전한 다국어 사전 (아이디/비밀번호 포함)
         const translations = {
-            ko: { idPlace: "원하는 ID를 정해서 입력하세요", connect: "접속", idInfo: "원하는 ID를 정한 후 이웃들을 등록해주세요. 등록한 이웃들을 볼 때도 정한 ID로 불러올 수 있습니다.", submit: "등록하기", namePlace: "닉네임 (Nickname)", xPlace: "X ID (@아이디)", passPlace: "비밀번호 입력", edit: "수정", del: "삭제", up: "위로", down: "아래로" },
-            en: { idPlace: "Enter Private ID", connect: "Connect", idInfo: "Set your ID first, then register neighbors.", submit: "SUBMIT", namePlace: "Nickname", xPlace: "X ID", passPlace: "Enter Password", edit: "Edit", del: "Delete", up: "Up", down: "Down" },
-            zh: { idPlace: "输入您的私人 ID", connect: "连接", idInfo: "先设置ID，然后注册邻居。", submit: "提交", namePlace: "昵称", xPlace: "X ID", passPlace: "输入密码", edit: "修改", del: "删除", up: "排名上升", down: "排名下降" },
-            ja: { idPlace: "管理 ID を入力してください", connect: "接続", idInfo: "最初にIDを設定してから、隣人を登録します。", submit: "登録する", namePlace: "ニックネーム", xPlace: "X ID", passPlace: "パスワード入力", edit: "修正", del: "削除", up: "上げる", down: "下げる" },
-            vi: { idPlace: "Nhập ID riêng của bạn", connect: "Kết nối", idInfo: "Đặt ID của bạn trước, sau đó đăng ký hàng xóm.", submit: "Gửi", namePlace: "Biệt danh", xPlace: "X ID", passPlace: "Nhập mật khẩu", edit: "Sửa", del: "Xóa", up: "Tăng", down: "Giảm" }
+            ko: { idPlace: "원하는 ID를 정해서 입력하세요", connect: "접속", idInfo: "원하는 ID를 정한 후 이웃들을 등록해주세요. 등록한 이웃들을 볼 때도 정한 ID로 불러올 수 있습니다.", submit: "등록하기", namePlace: "닉네임 (Nickname)", xPlace: "X ID (@아이디)", passPlace: "비밀번호 입력", edit: "수정", del: "삭제", up: "위로", down: "아래로", prev: "이전", next: "다음" },
+            en: { idPlace: "Enter Private ID", connect: "Connect", idInfo: "Set your ID first, then register neighbors.", submit: "SUBMIT", namePlace: "Nickname", xPlace: "X ID", passPlace: "Enter Password", edit: "Edit", del: "Delete", up: "Up", down: "Down", prev: "Prev", next: "Next" }
         };
 
         function changeLanguage(lang) {
@@ -101,7 +106,7 @@
             document.getElementById('userXId').placeholder = t.xPlace;
             document.getElementById('passCode').placeholder = t.passPlace;
             document.getElementById('btnSubmit').innerText = t.submit;
-            fetchUsers();
+            renderTable(allUsers);
         }
 
         window.onload = () => {
@@ -115,6 +120,7 @@
             const mId = document.getElementById('managerId').value;
             if(!mId) return;
             localStorage.setItem('river_manager_id', mId);
+            currentPage = 1; // ID 변경 시 1페이지로 리셋
             fetchUsers();
             alert(`[${mId}] 접속 성공!`);
         }
@@ -123,20 +129,28 @@
             const mId = document.getElementById('managerId').value;
             if(!mId) return;
             const { data } = await supabaseClient.from('river_members').select('*').eq('country', currentCountry).eq('manager_id', mId).order('priority', { ascending: false }).order('id', { ascending: false });
-            renderTable(data || []);
+            allUsers = data || [];
+            renderTable(allUsers);
         }
 
+        // 📝 테이블 렌더링 (10명씩 끊어서 보여주기)
         function renderTable(users) {
             const tableBody = document.getElementById('userTableBody');
             tableBody.innerHTML = '';
             const t = translations[currentLang] || translations.en;
-            users.forEach((user, index) => {
+
+            // 페이징 계산 로직
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pagedUsers = users.slice(startIndex, endIndex);
+
+            pagedUsers.forEach((user, index) => {
                 const isHigh = user.priority > 0;
                 const row = document.createElement('tr');
                 row.className = isHigh ? "priority-row transition-colors" : "hover:bg-slate-800/30 transition-colors";
                 
-                // 🕒 명단 내 시간 표시 제거
-                row.innerHTML = `<td class="p-4 w-full"><div class="flex justify-between items-start"><div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-[9px] font-bold ${isHigh ? 'text-indigo-400' : 'text-slate-500'}">${isHigh ? '⭐ TOP' : '#' + (index+1)}</span></div><a href="https://x.com/${user.x_id}" target="_blank" class="font-bold text-slate-100 text-base block mb-0.5 tracking-tight cursor-pointer">${user.name}</a><div class="text-[10px] text-slate-500 font-mono tracking-tighter">@${user.x_id}</div></div><div class="flex items-center gap-1">
+                // 등록 시간 표시 삭제됨
+                row.innerHTML = `<td class="p-4 w-full"><div class="flex justify-between items-start"><div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-[9px] font-bold ${isHigh ? 'text-indigo-400' : 'text-slate-500'}">${isHigh ? '⭐ TOP' : '#' + (startIndex + index + 1)}</span></div><a href="https://x.com/${user.x_id}" target="_blank" class="font-bold text-slate-100 text-base block mb-0.5 tracking-tight cursor-pointer">${user.name}</a><div class="text-[10px] text-slate-500 font-mono tracking-tighter">@${user.x_id}</div></div><div class="flex items-center gap-1">
                     <button onclick="adjustPriority(${user.id}, ${user.priority + 1})" title="${t.up}" class="bg-indigo-900/40 text-indigo-300 p-2 rounded-lg text-xs">🔼</button>
                     <button onclick="adjustPriority(${user.id}, ${user.priority - 1})" title="${t.down}" class="bg-slate-800 text-slate-400 p-2 rounded-lg text-xs">🔽</button>
                     <button onclick="editName(${user.id}, '${user.name}')" title="${t.edit}" class="bg-slate-800 text-amber-400/80 p-2 rounded-lg text-xs ml-1">📝</button>
@@ -144,6 +158,41 @@
                 </div></div></td>`;
                 tableBody.appendChild(row);
             });
+
+            renderPagination(users.length);
+        }
+
+        // 📟 페이지 버튼 생성 함수
+        function renderPagination(totalCount) {
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+            const totalPages = Math.ceil(totalCount / itemsPerPage);
+            const t = translations[currentLang] || translations.en;
+
+            if (totalPages <= 1) return; // 10명 이하면 버튼 안 보임
+
+            // 이전 버튼
+            const prevBtn = document.createElement('button');
+            prevBtn.innerText = t.prev;
+            prevBtn.className = `page-btn ${currentPage === 1 ? 'opacity-30' : ''}`;
+            prevBtn.onclick = () => { if(currentPage > 1) { currentPage--; renderTable(allUsers); window.scrollTo(0,0); } };
+            paginationDiv.appendChild(prevBtn);
+
+            // 숫자 버튼
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i;
+                btn.className = `page-btn ${currentPage === i ? 'active' : ''}`;
+                btn.onclick = () => { currentPage = i; renderTable(allUsers); window.scrollTo(0,0); };
+                paginationDiv.appendChild(btn);
+            }
+
+            // 다음 버튼
+            const nextBtn = document.createElement('button');
+            nextBtn.innerText = t.next;
+            nextBtn.className = `page-btn ${currentPage === totalPages ? 'opacity-30' : ''}`;
+            nextBtn.onclick = () => { if(currentPage < totalPages) { currentPage++; renderTable(allUsers); window.scrollTo(0,0); } };
+            paginationDiv.appendChild(nextBtn);
         }
 
         async function saveUser() {
@@ -167,7 +216,7 @@
 
         async function deleteUser(id) { if(confirm(translations[currentLang].del + "?")) { await supabaseClient.from('river_members').delete().eq('id', id); fetchUsers(); } }
 
-        function switchCountry(code) { currentCountry = code; document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.classList.remove('tab-active')); document.getElementById(`tab-${code}`).classList.add('tab-active'); fetchUsers(); }
+        function switchCountry(code) { currentCountry = code; currentPage = 1; document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.classList.remove('tab-active')); document.getElementById(`tab-${code}`).classList.add('tab-active'); fetchUsers(); }
 
         function updateLiveClocks() {
             const html = Object.keys(timeZones).map(code => {
