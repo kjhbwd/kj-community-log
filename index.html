@@ -9,7 +9,8 @@
     <style>
         body { background-color: #0f172a; color: #e2e8f0; font-family: sans-serif; }
         .box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
-        input, select { background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 10px; color: white; width: 100%; }
+        input, select { background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 10px; color: white; width: 100%; outline: none; }
+        input:focus { border-color: #6366f1; }
     </style>
 </head>
 <body class="p-6">
@@ -20,10 +21,10 @@
             <p class="text-slate-400">오늘의 활동을 간단히 기록하고 보관하세요.</p>
         </header>
 
-        <div class="box mb-8">
+        <div class="box mb-8 shadow-2xl">
             <div class="grid grid-cols-1 gap-4 mb-4">
-                <input id="userName" type="text" placeholder="닉네임 (Nickname)">
-                <input id="userXId" type="text" placeholder="아이디 (ID)">
+                <input id="userName" type="text" placeholder="닉네임 (Name)">
+                <input id="userXId" type="text" placeholder="X ID 또는 프로필 주소 (@아이디)">
                 <select id="userCountry">
                     <option value="KR">Korea</option>
                     <option value="US">USA</option>
@@ -31,24 +32,24 @@
                     <option value="JP">Japan</option>
                 </select>
             </div>
-            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-indigo-600 py-3 rounded-lg font-bold hover:bg-indigo-500 transition">
+            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-indigo-600 py-4 rounded-xl font-black hover:bg-indigo-500 transition-all uppercase tracking-widest">
                 기록 저장하기 (Save Note)
             </button>
         </div>
 
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold">Recent Logs</h2>
-            <span id="memberCount" class="text-sm text-indigo-400">Total: 0</span>
+            <span id="memberCount" class="text-sm text-indigo-400 font-bold">Total: 0</span>
         </div>
 
-        <div class="box overflow-x-auto">
+        <div class="box overflow-x-auto shadow-xl">
             <table class="w-full text-left">
                 <thead class="text-slate-500 text-xs uppercase border-b border-slate-700">
                     <tr>
-                        <th class="pb-3">No.</th>
-                        <th class="pb-3">User</th>
-                        <th class="pb-3">Loc</th>
-                        <th class="pb-3 text-right">Link</th>
+                        <th class="pb-3 px-2">No.</th>
+                        <th class="pb-3 px-2">User</th>
+                        <th class="pb-3 px-2">Loc</th>
+                        <th class="pb-3 px-2 text-right">Link</th>
                     </tr>
                 </thead>
                 <tbody id="userTableBody" class="text-sm divide-y divide-slate-800">
@@ -58,52 +59,77 @@
     </div>
 
     <script>
-        // 수파베이스 연결 정보 (이미지 확인 값)
+        // 이미지에서 확인된 수파베이스 연결 정보
         const SUPABASE_URL = 'https://xheuxdsbwcueutukeblm.supabase.co'; 
-        const SUPABASE_KEY = 'sb_publishable_TW6tF_10D5-zv5FdXZE87g_8sNPZ6xN8NInuT1n6R-f4F0P5S2V2fN-0v-N-0v-N'; 
+        const SUPABASE_KEY = 'sb_publishable_TW6tF_10D5-zv5FdXZE87g_8sNPZmuF'; 
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // 1. 데이터 불러오기 함수
         async function fetchUsers() {
             const { data, error } = await supabaseClient
-                .from('river_members') // 내부 테이블명은 유저에게 안 보임
+                .from('river_members') // 테이블 이름 확인됨
                 .select('*')
                 .order('id', { ascending: false });
             if (!error) renderTable(data);
         }
 
+        // 2. 테이블 렌더링 함수
         function renderTable(users) {
             const tableBody = document.getElementById('userTableBody');
             tableBody.innerHTML = '';
             users.forEach((user, index) => {
                 const row = document.createElement('tr');
+                row.className = "hover:bg-slate-800/50 transition-colors";
                 row.innerHTML = `
-                    <td class="py-4 text-indigo-500">#${users.length - index}</td>
-                    <td class="py-4 font-medium">${user.name}<br><span class="text-xs text-slate-500">@${user.x_id}</span></td>
-                    <td class="py-4 text-lg">${user.country}</td>
-                    <td class="py-4 text-right"><a href="https://x.com/${user.x_id}" target="_blank" class="text-xs text-indigo-400 underline">Link</a></td>
+                    <td class="py-4 px-2 text-indigo-500 font-mono">#${users.length - index}</td>
+                    <td class="py-4 px-2 font-medium">
+                        ${user.name}<br><span class="text-[10px] text-slate-500">@${user.x_id}</span>
+                    </td>
+                    <td class="py-4 px-2 text-lg">${user.country}</td>
+                    <td class="py-4 px-2 text-right">
+                        <a href="https://x.com/${user.x_id}" target="_blank" class="text-[10px] bg-white text-black px-2 py-1 rounded font-bold uppercase">View</a>
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });
             document.getElementById('memberCount').innerText = `Total: ${users.length}`;
         }
 
+        // 3. 데이터 저장 함수
         async function saveUser() {
-            const name = document.getElementById('userName').value;
-            const xId = document.getElementById('userXId').value.trim();
-            const country = document.getElementById('userCountry').value;
-            if (name && xId) {
+            const nameInput = document.getElementById('userName');
+            const xInput = document.getElementById('userXId');
+            const countryInput = document.getElementById('userCountry');
+            const btn = document.getElementById('btnSubmit');
+
+            // X 주소에서 아이디만 추출하는 로직
+            let xId = xInput.value.trim().replace('@', '').split('x.com/').pop().split('?')[0];
+
+            if (nameInput.value && xId) {
+                btn.innerText = "저장 중...";
+                btn.disabled = true;
+
+                // Supabase 테이블(river_members)에 데이터 삽입
                 const { error } = await supabaseClient
                     .from('river_members')
-                    .insert([{ name, x_id: xId, country }]);
+                    .insert([{ name: nameInput.value, x_id: xId, country: countryInput.value }]);
+
                 if (!error) {
-                    document.getElementById('userName').value = ''; 
-                    document.getElementById('userXId').value = '';
+                    nameInput.value = ''; xInput.value = '';
                     fetchUsers();
-                    alert("기록되었습니다.");
+                    alert("기록이 성공적으로 저장되었습니다!");
+                } else {
+                    alert("저장 실패: " + error.message);
                 }
+                btn.innerText = "기록 저장하기 (Save Note)";
+                btn.disabled = false;
+            } else {
+                alert("이름과 아이디를 모두 입력해주세요.");
             }
         }
+
+        // 초기 데이터 로드
         fetchUsers();
     </script>
 </body>
