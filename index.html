@@ -1,1 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>River Global Registry | PTS 성장 기록 일지</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
+        .river-gradient-text { background: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
+    </style>
+</head>
+<body>
 
+    <nav class="sticky top-0 z-50 glass-panel border-b border-slate-800 p-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex flex-col">
+                <span class="text-xl font-black tracking-tighter river-gradient-text uppercase">River Global Registry</span>
+                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">성장 기록 일지</span>
+            </div>
+            <a href="https://x.com/kjhbwd" target="_blank" class="flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-700 rounded-xl">
+                <span class="text-[10px] text-slate-500 font-bold uppercase">Architect</span>
+                <span class="text-xs font-bold text-blue-400">kjhbwd</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto py-16 px-6">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black mb-4">전 세계 River 유저들과 <br><span class="river-gradient-text">함께 성장하세요</span></h1>
+        </header>
+
+        <div class="glass-panel rounded-3xl p-8 mb-12 shadow-2xl">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <input id="userName" type="text" placeholder="이름 (Name)" class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none">
+                <input id="userXId" type="text" placeholder="X ID (@username)" class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none">
+                <select id="userCountry" class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-400 outline-none">
+                    <option value="KR">🇰🇷 Korea</option>
+                    <option value="US">🇺🇸 USA</option>
+                    <option value="CN">🇨🇳 China</option>
+                    <option value="JP">🇯🇵 Japan</option>
+                    <option value="VN">🇻🇳 Vietnam</option>
+                </select>
+            </div>
+            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest">
+                일지에 기록하기 (REGISTER)
+            </button>
+        </div>
+
+        <div class="glass-panel rounded-3xl overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-900/80 text-slate-500 text-[10px] font-black uppercase border-b border-slate-800">
+                    <tr>
+                        <th class="p-6">No.</th>
+                        <th class="p-6">Member</th>
+                        <th class="p-6">Country</th>
+                        <th class="p-6 text-right">Link</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody" class="divide-y divide-slate-800/50"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'YOUR_PROJECT_URL'; // 실제 URL 입력
+        const SUPABASE_KEY = 'YOUR_ANON_KEY';    // 실제 Key 입력
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function fetchUsers() {
+            const { data, error } = await supabaseClient.from('river_members').select('*').order('id', { ascending: false });
+            if (!error) renderTable(data);
+        }
+
+        function renderTable(users) {
+            const tableBody = document.getElementById('userTableBody');
+            tableBody.innerHTML = '';
+            const flags = { KR:'🇰🇷', US:'🇺🇸', CN:'🇨🇳', JP:'🇯🇵', VN:'🇻🇳' };
+            users.forEach((user, index) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-800/30 transition-colors";
+                row.innerHTML = `
+                    <td class="p-6 font-mono text-blue-500 text-sm">#${String(users.length - index).padStart(3, '0')}</td>
+                    <td class="p-6 font-bold text-slate-200">${user.name} <span class="text-[10px] text-slate-500 font-normal ml-2">@${user.x_id}</span></td>
+                    <td class="p-6 text-lg">${flags[user.country] || '🌐'}</td>
+                    <td class="p-6 text-right"><a href="https://x.com/${user.x_id}" target="_blank" class="bg-white text-black text-[10px] font-black px-4 py-2 rounded-lg uppercase">View X</a></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        async function saveUser() {
+            const name = document.getElementById('userName').value;
+            const xInput = document.getElementById('userXId').value.trim().replace('@', '');
+            const country = document.getElementById('userCountry').value;
+            if (name && xInput) {
+                await supabaseClient.from('river_members').insert([{ name, x_id: xInput, country }]);
+                document.getElementById('userName').value = ''; document.getElementById('userXId').value = '';
+                fetchUsers();
+            }
+        }
+        fetchUsers();
+    </script>
+</body>
+</html>
