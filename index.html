@@ -3,228 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIVER LOG - Pagination Master</title>
+    <title>River 글로벌 상호 교류 활성화</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #0f172a; color: #e2e8f0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
         .box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px; }
-        input { background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 12px; color: white; width: 100%; outline: none; font-size: 16px; }
+        input { background: #0f172a !important; border: 1px solid #475569; border-radius: 8px; padding: 10px; color: white; outline: none; font-size: 14px; }
         .brand-gradient { background: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .priority-row { background: rgba(99, 102, 241, 0.15); border-left: 4px solid #6366f1; }
-        .tab-active { background: #4f46e5 !important; color: white !important; font-weight: 900; box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.4); }
-        button:active { transform: scale(0.94); transition: 0.1s; }
-        .dev-glow { background: linear-gradient(45deg, #6366f1, #a855f7); box-shadow: 0 0 12px rgba(147, 51, 234, 0.6); }
+        .nav-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; gap: 1rem; }
+        .asset-widget { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 14px; padding: 10px 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .calc-input { width: 85px !important; text-align: center; background: #0f172a !important; border: 1px solid #475569 !important; border-radius: 6px; }
+        .tab-active { background: #4f46e5 !important; color: white !important; font-weight: 900; }
+        .daily-log-box { background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-top: 10px; width: 100%; max-width: 300px; }
+        .log-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .title-text { white-space: nowrap; word-break: keep-all; padding-right: 25px; display: inline-block; }
+        .btn-icon { cursor: pointer; transition: opacity 0.2s; font-size: 14px; padding: 4px; }
+        .btn-icon:hover { opacity: 0.6; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .page-btn { background: #334155; color: #94a3b8; padding: 8px 14px; border-radius: 8px; font-weight: bold; font-size: 13px; transition: 0.2s; }
-        .page-btn.active { background: #4f46e5; color: white; }
+        .guide-box { font-size: 11px; color: #94a3b8; line-height: 1.6; border-left: 3px solid #6366f1; padding-left: 10px; }
+        .page-btn { background: #334155; color: #94a3b8; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
+        .page-btn.active { background: #6366f1; color: white; font-weight: 900; }
     </style>
 </head>
 <body class="pb-10">
 
-    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 p-3">
-        <div class="max-w-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
-            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-                <span class="font-black brand-gradient italic tracking-tighter text-xl">RIVER LOG</span>
-                <a href="https://x.com/thejediworld77" target="_blank" class="dev-glow px-4 py-2 rounded-xl flex flex-col items-center transition-transform hover:scale-105">
-                    <span class="text-[8px] font-bold text-indigo-100 uppercase tracking-widest">Developer</span>
-                    <span class="text-[11px] font-black text-white">@김지호bwd</span>
-                </a>
+    <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 p-4">
+        <div class="max-w-7xl mx-auto nav-grid">
+            <div id="clockDisplay" class="flex gap-3 text-[10px] font-bold text-blue-400 font-mono border-r border-slate-700 pr-4"></div>
+            
+            <div class="text-center overflow-visible">
+                <span id="main-title" class="font-black brand-gradient italic text-xl md:text-2xl tracking-tighter title-text">River 글로벌 상호 교류 활성화</span>
             </div>
             
-            <div class="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end">
-                <select id="langSelect" onchange="changeLanguage(this.value)" class="bg-slate-800 border border-slate-700 text-[10px] text-white rounded-lg px-2 py-1.5 outline-none">
-                    <option value="ko">🇰🇷 한국어</option><option value="en">🇺🇸 English</option>
-                    <option value="zh">🇨🇳 中文</option><option value="ja">🇯🇵 日本語</option><option value="vi">🇻🇳 Tiếng Việt</option>
-                </select>
-                <div id="clockDisplay" class="flex gap-2 overflow-x-auto no-scrollbar"></div>
+            <div class="flex flex-col items-end">
+                <div class="asset-widget flex items-center gap-4">
+                    <div class="flex flex-col items-center">
+                        <span id="lbl-mypts" class="text-[8px] text-slate-500 font-black uppercase">MY PTS</span>
+                        <input id="calcQty" type="number" oninput="runCalculation()" placeholder="0" class="calc-input font-bold text-white">
+                    </div>
+                    <div class="h-8 w-[1px] bg-slate-700"></div>
+                    <div class="flex flex-col items-center px-1">
+                        <span id="lbl-price" class="text-[8px] text-indigo-400 font-black uppercase tracking-tighter">PTS PRICE (BNB)</span>
+                        <span id="ptsPriceDisplay" class="text-[11px] font-black text-white">$ 0.005527</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span id="lbl-value" class="text-[8px] text-green-500 font-black uppercase tracking-tighter">BITHUMB USDT VALUE</span>
+                        <span id="resKrw" class="text-[14px] font-black text-white">₩ 0</span>
+                        <span id="currentUsdtRate" class="text-[9px] text-slate-500 mt-1 font-mono tracking-tighter">1 USDT = ₩ 0</span>
+                    </div>
+                </div>
+                <div class="daily-log-box">
+                    <div class="flex gap-2 mb-2">
+                        <input id="dailyPtsInput" type="number" placeholder="오늘 수량" class="flex-1 bg-transparent border-b border-slate-600 text-[11px] p-1 outline-none text-white">
+                        <button onclick="addDailyLogToDB()" id="btnLogAdd" class="bg-indigo-600 px-3 py-1 rounded text-[11px] font-black text-white">기록</button>
+                    </div>
+                    <div id="dailyLogList" class="max-h-32 overflow-y-auto no-scrollbar"></div>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-2xl mx-auto p-4">
-        <div class="box mb-6 border-2 border-indigo-500/40 bg-indigo-900/10 shadow-xl">
-            <div class="flex gap-2 mb-2">
-                <input id="managerId" type="text" placeholder="원하는 ID를 정해서 입력하세요" class="flex-1 border-indigo-500/50">
-                <button onclick="saveAndConnect()" id="btnConnect" class="bg-indigo-600 px-6 rounded-lg font-black text-sm">접속</button>
+    <div class="max-w-2xl mx-auto p-4 space-y-6">
+        <div class="flex justify-end">
+            <select id="langSelect" onchange="changeLanguage(this.value)" class="bg-slate-800 text-[11px] text-white rounded px-2 py-1 border border-slate-700 outline-none cursor-pointer">
+                <option value="ko">🇰🇷 한국어</option><option value="en">🇺🇸 English</option>
+                <option value="zh">🇨🇳 中文</option><option value="ja">🇯🇵 日本語</option><option value="vi">🇻🇳 Tiếng Việt</option>
+            </select>
+        </div>
+
+        <div class="box border-2 border-indigo-500/20 bg-indigo-900/10 shadow-xl space-y-4">
+            <div class="flex gap-2">
+                <input id="managerId" type="text" placeholder="원하는 ID를 정해서 입력하세요" class="flex-1 border-indigo-500/40">
+                <button onclick="saveAndConnect()" id="btnConnect" class="bg-indigo-600 px-6 rounded-lg font-black text-sm text-white">접속</button>
             </div>
-            <p id="txt-id-info" class="text-[11px] text-slate-400">원하는 ID를 정한 후 이웃들을 등록해주세요. 등록한 이웃들을 볼 때도 정한 ID로 불러올 수 있습니다.</p>
+            <div id="guideContent" class="guide-box"></div>
         </div>
 
-        <div class="flex justify-between gap-1 mb-6 bg-slate-800/50 p-1 rounded-xl no-scrollbar overflow-x-auto">
-            <button onclick="switchCountry('KR')" id="tab-KR" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">KR</button>
-            <button onclick="switchCountry('US')" id="tab-US" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">US</button>
-            <button onclick="switchCountry('CN')" id="tab-CN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">CN</button>
-            <button onclick="switchCountry('JP')" id="tab-JP" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">JP</button>
-            <button onclick="switchCountry('VN')" id="tab-VN" class="flex-1 min-w-[65px] py-3 text-xs rounded-lg text-slate-400 font-black">VN</button>
+        <div class="box bg-slate-800/30 flex gap-2">
+            <input id="newMemberName" type="text" placeholder="새로운 이웃 이름을 입력하세요" class="flex-1">
+            <button onclick="addNewMember()" class="bg-blue-600 px-6 rounded-lg font-black text-xs text-white">추가</button>
         </div>
 
-        <div class="box mb-8 shadow-xl border border-indigo-500/10">
-            <div class="grid grid-cols-1 gap-3 mb-4">
-                <input id="userName" type="text" placeholder="닉네임 (Nickname)">
-                <input id="userXId" type="text" placeholder="X ID (@아이디)">
-                <input id="passCode" type="password" placeholder="비밀번호 입력" class="border-indigo-500/20">
-            </div>
-            <button onclick="saveUser()" id="btnSubmit" class="w-full bg-indigo-600 py-4 rounded-xl font-black text-white shadow-lg uppercase">등록하기</button>
+        <div class="flex justify-between gap-1 bg-slate-800/50 p-1 rounded-xl overflow-x-auto no-scrollbar">
+            <button onclick="switchCountry('KR')" id="tab-KR" class="flex-1 min-w-[60px] py-3 text-xs rounded-lg text-slate-400 font-black">KR</button>
+            <button onclick="switchCountry('US')" id="tab-US" class="flex-1 min-w-[60px] py-3 text-xs rounded-lg text-slate-400 font-black">US</button>
+            <button onclick="switchCountry('CN')" id="tab-CN" class="flex-1 min-w-[60px] py-3 text-xs rounded-lg text-slate-400 font-black">CN</button>
+            <button onclick="switchCountry('JP')" id="tab-JP" class="flex-1 min-w-[60px] py-3 text-xs rounded-lg text-slate-400 font-black">JP</button>
+            <button onclick="switchCountry('VN')" id="tab-VN" class="flex-1 min-w-[60px] py-3 text-xs rounded-lg text-slate-400 font-black">VN</button>
         </div>
 
-        <div class="box p-0 overflow-hidden border-slate-800 shadow-2xl mb-4">
+        <div class="box p-0 overflow-hidden border-slate-800 shadow-2xl">
             <table class="w-full text-left">
                 <tbody id="userTableBody" class="text-sm divide-y divide-slate-800"></tbody>
             </table>
         </div>
-
-        <div id="pagination" class="flex justify-center gap-2 mt-6 mb-10"></div>
+        <div id="pagination" class="flex justify-center gap-2 pt-2"></div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://xheuxdsbwcueutukeblm.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_TW6tF_10D5-zv5FdXZE87g_8sNPZmuF'; 
-        const PRIVATE_CODE = '2126';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const PRIVATE_CODE = '2126'; 
         
-        let currentCountry = 'KR';
-        let currentLang = 'ko';
-        let allUsers = []; // 전체 데이터를 담는 변수
-        let currentPage = 1;
-        const itemsPerPage = 10; // 페이지당 10명 [페이징 기능 핵심]
-
-        const timeZones = { KR: 'Asia/Seoul', US: 'America/New_York', CN: 'Asia/Shanghai', JP: 'Asia/Tokyo', VN: 'Asia/Ho_Chi_Minh' };
+        let currentCountry = 'KR', currentLang = 'ko', allUsers = [], currentPage = 1;
+        const itemsPerPage = 10, timeZones = { KR: 'Asia/Seoul', US: 'America/New_York', CN: 'Asia/Shanghai', JP: 'Asia/Tokyo', VN: 'Asia/Ho_Chi_Minh' };
+        let livePtsPrice = 0.005527, usdtKrwRate = 1485;
 
         const translations = {
-            ko: { idPlace: "원하는 ID를 정해서 입력하세요", connect: "접속", idInfo: "원하는 ID를 정한 후 이웃들을 등록해주세요. 등록한 이웃들을 볼 때도 정한 ID로 불러올 수 있습니다.", submit: "등록하기", namePlace: "닉네임 (Nickname)", xPlace: "X ID (@아이디)", passPlace: "비밀번호 입력", edit: "수정", del: "삭제", up: "위로", down: "아래로", prev: "이전", next: "다음" },
-            en: { idPlace: "Enter Private ID", connect: "Connect", idInfo: "Set your ID first, then register neighbors.", submit: "SUBMIT", namePlace: "Nickname", xPlace: "X ID", passPlace: "Enter Password", edit: "Edit", del: "Delete", up: "Up", down: "Down", prev: "Prev", next: "Next" }
+            ko: { 
+                title: "River 글로벌 상호 교류 활성화", connect: "접속", logBtn: "기록", logPlace: "오늘 수량", mypts: "나의 PTS", price: "PTS PRICE (BNB)", value: "BITHUMB USDT VALUE",
+                guide: "<strong>💡 사용 방법 안내:</strong><br>1. <strong>접속</strong> 버튼 클릭 시 비밀번호를 입력해야 합니다.<br>2. 🔼/🔽 화살표로 명단 순위를 <strong>한 칸씩</strong> 정확하게 조정할 수 있습니다.<br>3. 이웃 추가 시 순위는 자동으로 가장 마지막에 설정됩니다."
+            },
+            en: { 
+                title: "River Global Exchange Activation", connect: "Connect", logBtn: "Add", logPlace: "Daily Qty", mypts: "MY PTS", price: "PTS PRICE (BNB)", value: "BITHUMB USDT VALUE",
+                guide: "<strong>💡 Instructions:</strong><br>1. A password is required when clicking the <strong>Connect</strong> button.<br>2. Use 🔼/🔽 to rank <strong>one step at a time</strong> accurately.<br>3. New members are automatically added to the end of the list."
+            },
+            zh: { 
+                title: "River 全球相互交流激活", connect: "连接", logBtn: "提交", logPlace: "今日数量", mypts: "我的 PTS", price: "PTS 价格 (BNB)", value: "BITHUMB USDT 价值",
+                guide: "<strong>💡 使用指南:</strong><br>1. 点击 <strong>连接</strong> 按钮时需要输入密码。<br>2. 🔼/🔽 <strong>逐级</strong>准确调整顺序。<br>3. 添加新成员时，排名将自动添加至最后。"
+            },
+            ja: { 
+                title: "River グローバル相互交流の活性化", connect: "接続", logBtn: "登録", logPlace: "今日の数量", mypts: "マイ PTS", price: "PTS 価格 (BNB)", value: "BITHUMB USDT 価値",
+                guide: "<strong>💡 使用방법のご案内:</strong><br>1. <strong>接続</strong> ボタンをクリックする際にパスワードが必要です。<br>2. 🔼/🔽 で順位を<strong>一つずつ</strong>正確に調整できます。<br>3. メンバー追加時, 順位は自動的に最後尾になります。"
+            },
+            vi: { 
+                title: "Kích hoạt trao đổi toàn cầu River", connect: "Kết nối", logBtn: "Gửi", logPlace: "Số lượng hôm nay", mypts: "PTS CỦA TÔI", price: "GIÁ PTS (BNB)", value: "GIÁ TRỊ BITHUMB USDT",
+                guide: "<strong>💡 Hướng dẫn sử dụng:</strong><br>1. Cần nhập mật khẩu khi nhấn nút <strong>Kết nối</strong>.<br>2. Dùng 🔼/🔽 để xếp hạng <strong>từng bước</strong> một cách chính xác.<br>3. Thành viên mới được tự động thêm vào cuối."
+            }
         };
 
-        function changeLanguage(lang) {
-            currentLang = lang;
-            const t = translations[lang] || translations.en;
-            document.getElementById('managerId').placeholder = t.idPlace;
-            document.getElementById('btnConnect').innerText = t.connect;
-            document.getElementById('txt-id-info').innerText = t.idInfo;
-            document.getElementById('userName').placeholder = t.namePlace;
-            document.getElementById('userXId').placeholder = t.xPlace;
-            document.getElementById('passCode').placeholder = t.passPlace;
-            document.getElementById('btnSubmit').innerText = t.submit;
-            renderTable(allUsers);
+        async function updateMarketData() {
+            try {
+                const res = await fetch('https://api.bithumb.com/public/ticker/USDT_KRW');
+                const data = await res.json();
+                if(data.status === "0000") {
+                    usdtKrwRate = parseFloat(data.data.closing_price);
+                    document.getElementById('currentUsdtRate').innerText = `1 USDT = ₩ ${usdtKrwRate.toLocaleString()}`;
+                    runCalculation();
+                }
+            } catch(e) {}
+        }
+        function runCalculation() {
+            const qty = parseFloat(document.getElementById('calcQty').value) || 0;
+            const total = qty * livePtsPrice * usdtKrwRate;
+            document.getElementById('resKrw').innerText = `₩ ${Math.floor(total).toLocaleString()}`;
         }
 
-        window.onload = () => {
-            const savedId = localStorage.getItem('river_manager_id');
-            if(savedId) { document.getElementById('managerId').value = savedId; fetchUsers(); }
-            setInterval(updateLiveClocks, 1000);
-            updateLiveClocks();
-        };
+        // 🔒 접속 시에만 비밀번호 확인
+        function saveAndConnect() { 
+            const mId = document.getElementById('managerId').value;
+            if(!mId) return alert("ID를 입력해 주세요.");
+            const code = prompt("비밀번호를 입력하세요:");
+            if (code === PRIVATE_CODE) {
+                localStorage.setItem('river_manager_id', mId); 
+                fetchUsers(); fetchDailyLogs(); 
+            } else { alert("비밀번호가 틀렸습니다."); }
+        }
 
-        function saveAndConnect() {
+        // 📊 이웃 추가 시 자동 priority 부여
+        async function addNewMember() {
+            const mId = document.getElementById('managerId').value;
+            const name = document.getElementById('newMemberName').value;
+            if(!mId || !name) return alert("접속 ID와 이름을 확인해 주세요.");
+
+            const { data } = await supabaseClient.from('river_members').select('priority').eq('manager_id', mId).eq('country', currentCountry).order('priority', { ascending: false }).limit(1);
+            const nextPriority = (data && data.length > 0) ? data[0].priority + 1 : 1;
+
+            const { error } = await supabaseClient.from('river_members').insert([{ manager_id: mId, name: name, country: currentCountry, priority: nextPriority }]);
+            if(!error) { document.getElementById('newMemberName').value = ''; fetchUsers(); }
+        }
+
+        // 📊 순위 교환 로직 (한 칸씩 정교한 이동)
+        async function moveMember(globalIndex, direction) {
+            const targetIndex = globalIndex + direction;
+            if (targetIndex < 0 || targetIndex >= allUsers.length) return;
+            const current = allUsers[globalIndex], target = allUsers[targetIndex];
+            await supabaseClient.from('river_members').update({ priority: target.priority }).eq('id', current.id);
+            await supabaseClient.from('river_members').update({ priority: current.priority }).eq('id', target.id);
+            fetchUsers();
+        }
+
+        async function editMember(id, oldName) {
+            const newName = prompt("이름을 수정하세요:", oldName);
+            if(newName) { await supabaseClient.from('river_members').update({ name: newName }).eq('id', id); fetchUsers(); }
+        }
+        async function deleteMember(id) {
+            if(confirm("삭제하시겠습니까?")) { await supabaseClient.from('river_members').delete().eq('id', id); fetchUsers(); }
+        }
+
+        async function addDailyLogToDB() {
+            const mId = document.getElementById('managerId').value;
+            const qty = document.getElementById('dailyPtsInput').value;
+            if(!mId || !qty) return;
+            await supabaseClient.from('river_daily_logs').insert([{ manager_id: mId, amount: parseInt(qty) }]);
+            document.getElementById('dailyPtsInput').value = ''; fetchDailyLogs();
+        }
+        async function editLog(id, oldVal) {
+            const newVal = prompt("수정할 수량을 입력하세요:", oldVal);
+            if(newVal !== null && newVal !== "") {
+                await supabaseClient.from('river_daily_logs').update({ amount: parseInt(newVal) }).eq('id', id);
+                fetchDailyLogs();
+            }
+        }
+        async function deleteLog(id) {
+            if(confirm("기록을 삭제하시겠습니까?")) {
+                await supabaseClient.from('river_daily_logs').delete().eq('id', id); fetchDailyLogs();
+            }
+        }
+        async function fetchDailyLogs() {
             const mId = document.getElementById('managerId').value;
             if(!mId) return;
-            localStorage.setItem('river_manager_id', mId);
-            currentPage = 1; // ID 변경 시 1페이지로 리셋
-            fetchUsers();
-            alert(`[${mId}] 접속 성공!`);
+            const { data } = await supabaseClient.from('river_daily_logs').select('*').eq('manager_id', mId).order('created_at', { ascending: false }).limit(10);
+            const list = document.getElementById('dailyLogList');
+            list.innerHTML = (data || []).map(l => {
+                const d = new Date(l.created_at);
+                return `<div class="log-row"><div>🗓️ ${d.getMonth()+1}/${d.getDate()} <span class="font-bold text-indigo-400 ml-2">${l.amount.toLocaleString()} Pts</span></div><div class="flex gap-4"><span onclick="editLog(${l.id}, ${l.amount})" class="btn-icon">✏️</span><span onclick="deleteLog(${l.id})" class="btn-icon">❌</span></div></div>`;
+            }).join('');
         }
 
         async function fetchUsers() {
             const mId = document.getElementById('managerId').value;
             if(!mId) return;
-            const { data } = await supabaseClient.from('river_members').select('*').eq('country', currentCountry).eq('manager_id', mId).order('priority', { ascending: false }).order('id', { ascending: false });
-            allUsers = data || [];
-            renderTable(allUsers);
+            const { data } = await supabaseClient.from('river_members').select('*').eq('manager_id', mId).eq('country', currentCountry).order('priority', { ascending: false });
+            allUsers = data || []; renderTable();
         }
 
-        // 📝 테이블 렌더링 (10명씩 끊어서 보여주기)
-        function renderTable(users) {
-            const tableBody = document.getElementById('userTableBody');
-            tableBody.innerHTML = '';
-            const t = translations[currentLang] || translations.en;
-
-            // 페이징 계산 로직
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const pagedUsers = users.slice(startIndex, endIndex);
-
-            pagedUsers.forEach((user, index) => {
-                const isHigh = user.priority > 0;
+        function renderTable() {
+            const body = document.getElementById('userTableBody'); body.innerHTML = '';
+            const totalPages = Math.ceil(allUsers.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const pageData = allUsers.slice(start, start + itemsPerPage);
+            pageData.forEach((u, i) => {
+                const globalIdx = start + i;
                 const row = document.createElement('tr');
-                row.className = isHigh ? "priority-row transition-colors" : "hover:bg-slate-800/30 transition-colors";
-                
-                // 등록 시간 표시 삭제됨
-                row.innerHTML = `<td class="p-4 w-full"><div class="flex justify-between items-start"><div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-[9px] font-bold ${isHigh ? 'text-indigo-400' : 'text-slate-500'}">${isHigh ? '⭐ TOP' : '#' + (startIndex + index + 1)}</span></div><a href="https://x.com/${user.x_id}" target="_blank" class="font-bold text-slate-100 text-base block mb-0.5 tracking-tight cursor-pointer">${user.name}</a><div class="text-[10px] text-slate-500 font-mono tracking-tighter">@${user.x_id}</div></div><div class="flex items-center gap-1">
-                    <button onclick="adjustPriority(${user.id}, ${user.priority + 1})" title="${t.up}" class="bg-indigo-900/40 text-indigo-300 p-2 rounded-lg text-xs">🔼</button>
-                    <button onclick="adjustPriority(${user.id}, ${user.priority - 1})" title="${t.down}" class="bg-slate-800 text-slate-400 p-2 rounded-lg text-xs">🔽</button>
-                    <button onclick="editName(${user.id}, '${user.name}')" title="${t.edit}" class="bg-slate-800 text-amber-400/80 p-2 rounded-lg text-xs ml-1">📝</button>
-                    <button onclick="deleteUser(${user.id})" title="${t.del}" class="bg-red-900/10 text-red-500 p-2 rounded-lg text-xs ml-1">🗑️</button>
-                </div></div></td>`;
-                tableBody.appendChild(row);
+                row.innerHTML = `<td class="p-4 flex justify-between items-center"><div><span class="text-indigo-400 font-black mr-2">#${globalIdx + 1}</span><strong>${u.name}</strong></div><div class="flex gap-4 text-xl"><span onclick="moveMember(${globalIdx}, -1)" class="btn-icon text-blue-400">🔼</span><span onclick="moveMember(${globalIdx}, 1)" class="btn-icon text-blue-400">🔽</span><span onclick="editMember(${u.id}, '${u.name}')" class="btn-icon text-orange-400 text-sm">✏️</span><span onclick="deleteMember(${u.id})" class="btn-icon text-red-500 text-sm">❌</span></div></td>`;
+                body.appendChild(row);
             });
-
-            renderPagination(users.length);
+            renderPagination(totalPages);
         }
 
-        // 📟 페이지 버튼 생성 함수
-        function renderPagination(totalCount) {
-            const paginationDiv = document.getElementById('pagination');
-            paginationDiv.innerHTML = '';
-            const totalPages = Math.ceil(totalCount / itemsPerPage);
-            const t = translations[currentLang] || translations.en;
-
-            if (totalPages <= 1) return; // 10명 이하면 버튼 안 보임
-
-            // 이전 버튼
-            const prevBtn = document.createElement('button');
-            prevBtn.innerText = t.prev;
-            prevBtn.className = `page-btn ${currentPage === 1 ? 'opacity-30' : ''}`;
-            prevBtn.onclick = () => { if(currentPage > 1) { currentPage--; renderTable(allUsers); window.scrollTo(0,0); } };
-            paginationDiv.appendChild(prevBtn);
-
-            // 숫자 버튼
+        function renderPagination(totalPages) {
+            const div = document.getElementById('pagination'); div.innerHTML = '';
+            if (totalPages <= 1) return;
             for (let i = 1; i <= totalPages; i++) {
                 const btn = document.createElement('button');
-                btn.innerText = i;
-                btn.className = `page-btn ${currentPage === i ? 'active' : ''}`;
-                btn.onclick = () => { currentPage = i; renderTable(allUsers); window.scrollTo(0,0); };
-                paginationDiv.appendChild(btn);
+                btn.innerText = i; btn.className = `page-btn ${currentPage === i ? 'active' : ''} mx-1`;
+                btn.onclick = () => { currentPage = i; renderTable(); }; div.appendChild(btn);
             }
-
-            // 다음 버튼
-            const nextBtn = document.createElement('button');
-            nextBtn.innerText = t.next;
-            nextBtn.className = `page-btn ${currentPage === totalPages ? 'opacity-30' : ''}`;
-            nextBtn.onclick = () => { if(currentPage < totalPages) { currentPage++; renderTable(allUsers); window.scrollTo(0,0); } };
-            paginationDiv.appendChild(nextBtn);
         }
 
-        async function saveUser() {
-            const mId = document.getElementById('managerId').value;
-            const name = document.getElementById('userName').value;
-            const xInput = document.getElementById('userXId').value;
-            const pass = document.getElementById('passCode').value;
-            if(!mId) { alert("ID 접속 필요"); return; }
-            if(pass !== PRIVATE_CODE) { alert("비밀번호 오류"); return; }
-            let xId = xInput.trim().replace('@', '').split('x.com/').pop().split('?')[0];
-            await supabaseClient.from('river_members').insert([{ name, x_id: xId, country: currentCountry, manager_id: mId, priority: 0 }]);
-            document.getElementById('userName').value = ''; document.getElementById('userXId').value = ''; fetchUsers();
+        function changeLanguage(lang) {
+            currentLang = lang; const t = translations[lang] || translations.ko;
+            document.getElementById('main-title').innerText = t.title;
+            document.getElementById('btnConnect').innerText = t.connect;
+            document.getElementById('btnLogAdd').innerText = t.logBtn;
+            document.getElementById('dailyPtsInput').placeholder = t.logPlace;
+            document.getElementById('lbl-mypts').innerText = t.mypts;
+            document.getElementById('lbl-price').innerText = t.price;
+            document.getElementById('lbl-value').innerText = t.value;
+            document.getElementById('guideContent').innerHTML = t.guide;
+            fetchDailyLogs();
         }
 
-        async function editName(id, oldName) {
-            const newName = prompt(translations[currentLang].edit + ":", oldName);
-            if(newName && newName !== oldName) { await supabaseClient.from('river_members').update({ name: newName }).eq('id', id); fetchUsers(); }
+        function switchCountry(code) { 
+            currentCountry = code; currentPage = 1;
+            document.querySelectorAll('[onclick^="switchCountry"]').forEach(b => b.classList.remove('tab-active'));
+            document.getElementById(`tab-${code}`).classList.add('tab-active');
+            fetchUsers(); 
         }
 
-        async function adjustPriority(id, newP) { await supabaseClient.from('river_members').update({ priority: newP }).eq('id', id); fetchUsers(); }
-
-        async function deleteUser(id) { if(confirm(translations[currentLang].del + "?")) { await supabaseClient.from('river_members').delete().eq('id', id); fetchUsers(); } }
-
-        function switchCountry(code) { currentCountry = code; currentPage = 1; document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.classList.remove('tab-active')); document.getElementById(`tab-${code}`).classList.add('tab-active'); fetchUsers(); }
-
-        function updateLiveClocks() {
-            const html = Object.keys(timeZones).map(code => {
-                const time = new Date().toLocaleTimeString('en-US', { timeZone: timeZones[code], hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-                return `<div class="flex flex-col items-center min-w-[52px] leading-tight"><span class="text-[8px] text-slate-500 font-bold">${code}</span><span class="text-[10px] text-blue-400 font-mono font-bold">${time}</span></div>`;
-            }).join('');
-            document.getElementById('clockDisplay').innerHTML = html;
-        }
+        window.onload = () => {
+            updateMarketData(); setInterval(updateMarketData, 60000);
+            const savedId = localStorage.getItem('river_manager_id');
+            if(savedId) document.getElementById('managerId').value = savedId;
+            changeLanguage(currentLang);
+            if(savedId) { fetchUsers(); fetchDailyLogs(); }
+            switchCountry('KR');
+            setInterval(() => {
+                const html = Object.keys(timeZones).map(code => {
+                    const time = new Date().toLocaleTimeString('en-US', { timeZone: timeZones[code], hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    return `<div class="flex flex-col items-center min-w-[40px]"><span>${code}</span><span>${time}</span></div>`;
+                }).join('');
+                document.getElementById('clockDisplay').innerHTML = html;
+            }, 1000);
+        };
     </script>
 </body>
 </html>
