@@ -12,28 +12,38 @@
         input { background: #0f172a !important; border: 1px solid #475569; border-radius: 8px; padding: 10px; color: white; outline: none; font-size: 14px; }
         .brand-gradient { background: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* 🏷️ 타이틀: 반듯하게 & 잘림 방지 */
-        .nav-header { display: flex; justify-content: space-between; align-items: start; width: 100%; gap: 15px; }
-        .title-area { flex: 1; text-align: center; padding-top: 10px; }
+        .nav-header { display: flex; justify-content: space-between; align-items: start; width: 100%; gap: 10px; }
+        .title-area { flex: 1; text-align: center; padding-top: 5px; }
         .main-title-text { white-space: nowrap; font-weight: 900; display: inline-block; font-style: normal !important; letter-spacing: -0.02em; }
         
-        /* ⏰ 시계 영역 확대 */
+        /* ✨ 화려한 버튼 및 맥박 애니메이션 */
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.7); transform: scale(1); }
+            70% { box-shadow: 0 0 0 10px rgba(192, 132, 252, 0); transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0); transform: scale(1); }
+        }
+        .dev-btn-group { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        .btn-dev-flashy { background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; color: white; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 900; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
+        .btn-river-flashy { background: linear-gradient(135deg, #c084fc, #db2777); border: none; color: white; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 900; cursor: pointer; animation: pulse-glow 2s infinite; }
+
         .clock-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: rgba(30, 41, 59, 0.5); padding: 8px; border-radius: 12px; border: 1px solid #334155; }
         .clock-item { display: flex; flex-direction: column; align-items: center; min-width: 50px; }
         .clock-label { font-size: 9px; font-weight: 900; color: #6366f1; }
         .clock-time { font-size: 12px; font-weight: 700; color: #60a5fa; font-family: 'monospace'; }
 
-        /* 💰 자산 위젯 */
+        /* 💰 리버 계산기 위젯 복구 */
         .asset-widget { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 14px; padding: 8px 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
         .tab-active { background: #4f46e5 !important; color: white !important; font-weight: 900; }
+        
         .daily-log-box { background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 10px; margin-top: 8px; width: 100%; max-width: 320px; }
         .log-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        
         .btn-icon { cursor: pointer; transition: opacity 0.2s; font-size: 14px; padding: 4px; }
         .member-link { color: #60a5fa; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; font-weight: 700; }
-        .member-link:hover { color: #c084fc; }
-        .guide-box { font-size: 11px; color: #94a3b8; line-height: 1.6; border-left: 3px solid #6366f1; padding-left: 10px; }
         .page-btn { background: #334155; color: #94a3b8; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
         .page-btn.active { background: #6366f1; color: white; font-weight: 900; }
+
+        #adminStatsPanel { display: none; margin-top: 20px; background: linear-gradient(to right, #1e293b, #0f172a); border: 1px solid #6366f1; border-radius: 12px; padding: 15px; }
     </style>
 </head>
 <body class="pb-10">
@@ -41,15 +51,17 @@
     <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 p-4">
         <div class="max-w-7xl mx-auto nav-header">
             <div id="clockDisplay" class="clock-grid"></div>
-            
             <div class="title-area">
                 <span id="main-title" class="main-title-text brand-gradient text-xl md:text-3xl">River 글로벌 상호 교류 활성화</span>
+                <div class="dev-btn-group">
+                    <button id="btnDevLink" onclick="trackAndGo('Developer', 'https://x.com/thejediworld77')" class="btn-dev-flashy">개발자:김지호bwd</button>
+                    <button id="btnRiverLink" onclick="trackAndGo('RiverRef', 'https://app.river.inc/fun?ref=thejediworld77')" class="btn-river-flashy">River란?</button>
+                </div>
             </div>
-            
             <div class="flex flex-col items-end">
                 <div class="asset-widget flex items-center gap-3">
                     <div class="flex flex-col items-center">
-                        <span id="lbl-mypts" class="text-[7px] text-slate-500 font-black">MY PTS</span>
+                        <span id="lbl-mypts" class="text-[7px] text-slate-500 font-black">나의 PTS</span>
                         <input id="calcQty" type="number" oninput="runCalculation()" placeholder="0" class="w-14 text-center bg-transparent border-none text-white font-bold outline-none">
                     </div>
                     <div class="h-6 w-[1px] bg-slate-700"></div>
@@ -66,7 +78,7 @@
                 </div>
                 <div class="daily-log-box">
                     <div class="flex gap-2 mb-2">
-                        <input id="dailyPtsInput" type="number" placeholder="오늘 수량" class="flex-1 bg-transparent border-b border-slate-600 text-[11px] p-1 text-white outline-none">
+                        <input id="dailyPtsInput" type="number" placeholder="수량" class="flex-1 bg-transparent border-b border-slate-600 text-[11px] p-1 text-white outline-none">
                         <button onclick="addDailyLogToDB()" id="btnLogAdd" class="bg-indigo-600 px-3 py-1 rounded text-[11px] font-black text-white">기록</button>
                     </div>
                     <div id="dailyLogList" class="max-h-24 overflow-y-auto no-scrollbar"></div>
@@ -79,8 +91,8 @@
         <div class="flex justify-end">
             <select id="langSelect" onchange="changeLanguage(this.value)" class="bg-slate-800 text-[11px] text-white rounded px-2 py-1 border border-slate-700 outline-none cursor-pointer">
                 <option value="ko">🇰🇷 한국어</option><option value="en">🇺🇸 English</option>
-                <option value="zh">🇨🇳 中文</option><option value="ja">🇯🇵 日本語</option>
-                <option value="vi">🇻🇳 Tiếng Việt</option><option value="tr">🇹🇷 Türkçe</option>
+                <option value="tr">🇹🇷 Türkçe</option><option value="zh">🇨🇳 中文</option>
+                <option value="ja">🇯🇵 日本語</option><option value="vi">🇻🇳 Tiếng Việt</option>
             </select>
         </div>
 
@@ -93,8 +105,8 @@
         </div>
 
         <div class="box bg-slate-800/30 flex gap-2">
-            <input id="newMemberName" type="text" class="flex-1">
-            <input id="newMemberXId" type="text" class="flex-1">
+            <input id="newMemberName" type="text" class="flex-1" placeholder="X 닉네임">
+            <input id="newMemberXId" type="text" class="flex-1" placeholder="X 아이디 (@아이디)">
             <button onclick="addNewMember()" id="btnAddMember" class="bg-blue-600 px-6 rounded-lg font-black text-xs text-white">추가</button>
         </div>
 
@@ -113,40 +125,88 @@
             </table>
         </div>
         <div id="pagination" class="flex justify-center gap-2 pt-2"></div>
+
+        <div id="adminStatsPanel">
+            <h3 class="text-indigo-400 font-black mb-2 text-sm">🏆 SECRET MASTER STATS</h3>
+            <div id="statText" class="text-xs text-slate-300 font-mono">Loading...</div>
+        </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://xheuxdsbwcueutukeblm.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_TW6tF_10D5-zv5FdXZE87g_8sNPZmuF'; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const PRIVATE_CODE = '2126'; 
+        const PRIVATE_CODE = '2126', MASTER_ADMIN_CODE = '7777';
         
         let currentCountry = 'KR', currentLang = 'ko', allUsers = [], currentPage = 1;
-        const itemsPerPage = 10;
-        const timeZones = { KR: 'Asia/Seoul', US: 'America/New_York', CN: 'Asia/Shanghai', JP: 'Asia/Tokyo', VN: 'Asia/Ho_Chi_Minh', TR: 'Europe/Istanbul' };
+        const itemsPerPage = 10, timeZones = { KR: 'Asia/Seoul', US: 'America/New_York', CN: 'Asia/Shanghai', JP: 'Asia/Tokyo', VN: 'Asia/Ho_Chi_Minh', TR: 'Europe/Istanbul' };
         let livePtsPrice = 0, usdtKrwRate = 1485;
 
+        // 🌐 번역 사전 (전부 누락 없이 보강)
         const translations = {
-            ko: { title: "River 글로벌 상호 교류 활성화", connect: "접속", logBtn: "기록", logPlace: "오늘 수량", mypts: "나의 PTS", ptsprice: "PTS PRICE", value: "KRW VALUE", xName: "X 닉네임", xId: "X 아이디 (@아이디)", addBtn: "추가", guide: "<strong>💡 안내:</strong><br>1. <strong>접속</strong> 시 비밀번호가 필요합니다.<br>2. <strong>이름을 클릭</strong>하면 X 계정으로 이동합니다.<br>3. 🔼/🔽로 순위를 <strong>한 칸씩</strong> 조정하세요." },
-            en: { title: "River Global Exchange Activation", connect: "Connect", logBtn: "Add", logPlace: "Daily Qty", mypts: "MY PTS", ptsprice: "PTS PRICE", value: "KRW VALUE", xName: "X Nickname", xId: "X ID (@username)", addBtn: "Add", guide: "<strong>💡 Info:</strong><br>1. Password required to <strong>Connect</strong>.<br>2. <strong>Click name</strong> to visit X profile.<br>3. Use 🔼/🔽 to adjust rank <strong>one by one</strong>." },
-            tr: { title: "River Küresel Değişim Aktivasyonu", connect: "Bağlan", logBtn: "Ekle", logPlace: "Günlük Adet", mypts: "PTS'LERİM", ptsprice: "PTS FİYATI", value: "KRW DEĞERİ", xName: "X Takma Adı", xId: "X Kimliği (@kullanıcı)", addBtn: "Ekle", guide: "<strong>💡 Bilgi:</strong><br>1. Yönetim için <strong>Bağlan</strong> şifresi gerekir.<br>2. X'e gitmek için <strong>isme tıklayın</strong>.<br>3. 🔼/🔽 ile <strong>tek tek</strong> sıralayın." },
-            zh: { title: "River 全球相互交流激活", connect: "连接", logBtn: "提交", logPlace: "今日数量", mypts: "我的 PTS", ptsprice: "PTS 价格", value: "KRW 价值", xName: "X 昵称", xId: "X ID (@ID)", addBtn: "添加", guide: "<strong>💡 指南:</strong><br>1. <strong>连接</strong> 需密码。<br>2. <strong>点击名字</strong> 跳转 X。<br>3. 使用 🔼/🔽 <strong>逐级</strong> 调整。" },
-            ja: { title: "River グローバル相互交流の活性化", connect: "接続", logBtn: "登録", logPlace: "今日の数量", mypts: "マイ PTS", ptsprice: "PTS 価格", value: "KRW 価値", xName: "X 닉네임", xId: "X ID (@아이디)", addBtn: "追加", guide: "<strong>💡 案内:</strong><br>1. <strong>接続</strong> にはパスワードが必要です.<br>2. <strong>名前をクリック</strong> すると X に移動します.<br>3. 🔼/🔽 で <strong>一つずつ</strong> 調整します." },
-            vi: { title: "Kích hoạt trao đổi toàn cầu River", connect: "Kết nối", logBtn: "Gửi", logPlace: "Số lượng hôm nay", mypts: "PTS CỦA TÔI", ptsprice: "GIÁ PTS", value: "GIÁ TRỊ KRW", xName: "Biệt danh X", xId: "ID X (@username)", addBtn: "Thêm", guide: "<strong>💡 HD:</strong><br>1. Nhập mật khẩu khi <strong>Kết nối</strong>.<br>2. <strong>Nhấn tên</strong> để truy cập X.<br>3. Dùng 🔼/🔽 để chỉnh <strong>từng bước</strong>." }
+            ko: { 
+                title: "River 글로벌 상호 교류 활성화", connect: "접속", logBtn: "기록", mypts: "나의 PTS", ptsprice: "PTS PRICE", value: "KRW VALUE", xName: "X 닉네임", xId: "X 아이디 (@아이디)", addBtn: "추가", devBtn: "개발자:김지호bwd", riverBtn: "River란?", logPlace: "수량",
+                guide: "<strong>💡 안내:</strong><br>1. 원하는 제목을 정하고 **접속**을 눌러주세요 (비밀번호 필요).<br>2. **이름을 클릭**하면 연결된 X 계정으로 바로 이동합니다.<br>3. 🔼/🔽 화살표로 명단 순위를 **한 칸씩** 조정할 수 있습니다." 
+            },
+            en: { 
+                title: "River Global Exchange Activation", connect: "Connect", logBtn: "Add", mypts: "MY PTS", ptsprice: "PTS PRICE", value: "KRW VALUE", xName: "X Nickname", xId: "X ID (@username)", addBtn: "Add", devBtn: "Dev: Jiho Kim bwd", riverBtn: "What is River?", logPlace: "Qty",
+                guide: "<strong>💡 Info:</strong><br>1. Choose a title and press **Connect** (Password required).<br>2. **Click the name** to visit their X profile immediately.<br>3. Use 🔼/🔽 to adjust the rank **one step at a time**." 
+            },
+            zh: { 
+                title: "River 全球相互交流激活", connect: "连接", logBtn: "记录", mypts: "我的 PTS", ptsprice: "PTS 价格", value: "KRW 价值", xName: "X 昵称", xId: "X ID (@账号)", addBtn: "添加", devBtn: "开发者: 金智浩bwd", riverBtn: "什么是 River?", logPlace: "数量",
+                guide: "<strong>💡 指南:</strong><br>1. 选择一个标题并点击**连接** (需要密码)。<br>2. **点击名字** 立即访问其 X 个人资料。<br>3. 使用 🔼/🔽 **逐级** 调整排名。" 
+            },
+            tr: { 
+                title: "River Küresel Değişim Aktivasyonu", connect: "Bağlan", logBtn: "Ekle", mypts: "PTS'LERİM", ptsprice: "PTS FİYATI", value: "KRW DEĞERİ", xName: "X Takma Adı", xId: "X Kimliği (@kullanıcı)", addBtn: "Ekle", devBtn: "Geliştirici: Jiho Kim bwd", riverBtn: "River nedir?", logPlace: "Adet",
+                guide: "<strong>💡 Bilgi:</strong><br>1. İstediğiniz başlığı girin ve **Bağlan**'a basın (Şifre gereklidir).<br>2. X profilini ziyaret etmek için **isme tıklayın**.<br>3. Sıralamayı **tek tek** ayarlamak için 🔼/🔽 kullanın." 
+            },
+            ja: { 
+                title: "River グローバル相互交流の活性化", connect: "接続", logBtn: "登録", mypts: "マイ PTS", ptsprice: "PTS 価格", value: "KRW 価値", xName: "X 닉네임", xId: "X ID (@아이디)", addBtn: "追加", devBtn: "開発者: キム・ジホbwd", riverBtn: "Riverとは？", logPlace: "数量",
+                guide: "<strong>💡 案内:</strong><br>1. タイトルを決めて **接続** を押してください (パスワードが必要).<br>2. **名前をクリック** すると X アカウントに移動します.<br>3. 🔼/🔽 で順位を **一つずつ** 調整できます." 
+            },
+            vi: { 
+                title: "Kích hoạt trao đổi toàn cầu River", connect: "Kết nối", logBtn: "Gửi", mypts: "PTS CỦA TÔI", ptsprice: "GIÁ PTS", value: "GIÁ TRỊ KRW", xName: "Biệt danh X", xId: "ID X (@username)", addBtn: "Thêm", devBtn: "Phát triển: Jiho Kim bwd", riverBtn: "River là gì?", logPlace: "Số lượng",
+                guide: "<strong>💡 HD:</strong><br>1. Chọn tiêu đề và nhấn **Kết nối** (Cần mật khẩu).<br>2. **Nhấn tên** để truy cập X ngay lập tức.<br>3. Dùng 🔼/🔽 để chỉnh thứ hạng **từng bước**." 
+            }
         };
 
-        // 📊 실시간 PTS 시세 & 빗썸 환율 연동
+        async function trackAndGo(type, url) {
+            const mId = document.getElementById('managerId').value || 'anonymous';
+            await supabaseClient.from('river_clicks').insert([{ manager_id: mId, btn_type: type }]);
+            window.open(url, '_blank');
+        }
+
+        async function showAdminStats() {
+            const { data } = await supabaseClient.from('river_clicks').select('*');
+            if(data) {
+                const dev = data.filter(c => c.btn_type === 'Developer').length;
+                const ref = data.filter(c => c.btn_type === 'RiverRef').length;
+                document.getElementById('statText').innerHTML = `Dev: ${dev} | RiverRef: ${ref} | Total: ${data.length}`;
+            }
+        }
+
+        async function saveAndConnect() { 
+            const mId = document.getElementById('managerId').value;
+            const code = prompt("Password:");
+            if (code === MASTER_ADMIN_CODE) {
+                localStorage.setItem('river_manager_id', mId);
+                document.getElementById('adminStatsPanel').style.display = 'block';
+                showAdminStats(); fetchUsers(); fetchDailyLogs();
+            } else if (code === PRIVATE_CODE) {
+                localStorage.setItem('river_manager_id', mId);
+                document.getElementById('adminStatsPanel').style.display = 'none';
+                fetchUsers(); fetchDailyLogs();
+            } else { alert("Wrong Password!"); }
+        }
+
         async function updateMarketData() {
             try {
-                // 1. 빗썸 USDT/KRW 환율
                 const bRes = await fetch('https://api.bithumb.com/public/ticker/USDT_KRW');
                 const bData = await bRes.json();
                 if(bData.status === "0000") {
                     usdtKrwRate = parseFloat(bData.data.closing_price);
                     document.getElementById('currentUsdtRate').innerText = `1 USDT = ₩ ${usdtKrwRate.toLocaleString()}`;
                 }
-
-                // 2. River Pts (0xfc6...014) 실시간 가격
                 const tokenAddr = "0xfc6be825925b7a83d131e33b46efef9084f0e014";
                 const pRes = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${tokenAddr}`);
                 const pData = await pRes.json();
@@ -155,7 +215,7 @@
                     document.getElementById('ptsPriceDisplay').innerText = `$ ${livePtsPrice.toFixed(6)}`;
                 }
                 runCalculation();
-            } catch(e) { console.error("Data error:", e); }
+            } catch(e) {}
         }
 
         function runCalculation() {
@@ -164,24 +224,41 @@
             document.getElementById('resKrw').innerText = `₩ ${Math.floor(total).toLocaleString()}`;
         }
 
-        function saveAndConnect() { 
+        async function addDailyLogToDB() {
             const mId = document.getElementById('managerId').value;
-            if(!mId) return alert("ID!");
-            const code = prompt("PW:");
-            if (code === PRIVATE_CODE) { localStorage.setItem('river_manager_id', mId); fetchUsers(); fetchDailyLogs(); }
-            else { alert("X"); }
+            const qty = document.getElementById('dailyPtsInput').value;
+            if(!mId || !qty) return;
+            await supabaseClient.from('river_daily_logs').insert([{ manager_id: mId, amount: parseInt(qty) }]);
+            document.getElementById('dailyPtsInput').value = ''; fetchDailyLogs();
+        }
+
+        async function fetchDailyLogs() {
+            const mId = document.getElementById('managerId').value;
+            if(!mId) return;
+            const { data } = await supabaseClient.from('river_daily_logs').select('*').eq('manager_id', mId).order('created_at', { ascending: false }).limit(10);
+            document.getElementById('dailyLogList').innerHTML = (data || []).map(l => {
+                const d = new Date(l.created_at);
+                return `<div class="log-row"><div>🗓️ ${d.getMonth()+1}/${d.getDate()} <span class="font-bold text-indigo-400 ml-2">${l.amount.toLocaleString()} Pts</span></div><div class="flex gap-3"><span onclick="editLog(${l.id}, ${l.amount})" class="btn-icon">✏️</span><span onclick="deleteLog(${l.id})" class="btn-icon">❌</span></div></div>`;
+            }).join('');
+        }
+
+        async function editLog(id, old) {
+            const val = prompt("Edit:", old);
+            if(val) { await supabaseClient.from('river_daily_logs').update({ amount: parseInt(val) }).eq('id', id); fetchDailyLogs(); }
+        }
+        async function deleteLog(id) {
+            if(confirm("Delete?")) { await supabaseClient.from('river_daily_logs').delete().eq('id', id); fetchDailyLogs(); }
         }
 
         async function addNewMember() {
             const mId = document.getElementById('managerId').value;
-            const name = document.getElementById('newMemberName').value;
-            const xIdInput = document.getElementById('newMemberXId').value;
-            if(!mId || !name) return alert("Check!");
+            const name = document.getElementById('newMemberName').value, xId = document.getElementById('newMemberXId').value;
+            if(!mId || !name) return;
             const { data } = await supabaseClient.from('river_members').select('priority').eq('manager_id', mId).eq('country', currentCountry).order('priority', { ascending: false }).limit(1);
-            const nextPriority = (data && data.length > 0) ? data[0].priority + 1 : 1;
-            const cleanXId = xIdInput.startsWith('@') ? xIdInput.substring(1) : xIdInput;
-            const { error } = await supabaseClient.from('river_members').insert([{ manager_id: mId, name: name, x_id: cleanXId, country: currentCountry, priority: nextPriority }]);
-            if(!error) { document.getElementById('newMemberName').value = ''; document.getElementById('newMemberXId').value = ''; fetchUsers(); }
+            const nextP = (data && data.length > 0) ? data[0].priority + 1 : 1;
+            const cleanX = xId.startsWith('@') ? xId.substring(1) : xId;
+            await supabaseClient.from('river_members').insert([{ manager_id: mId, name: name, x_id: cleanX, country: currentCountry, priority: nextP }]);
+            document.getElementById('newMemberName').value = ''; document.getElementById('newMemberXId').value = ''; fetchUsers();
         }
 
         async function moveMember(globalIndex, direction) {
@@ -193,37 +270,12 @@
             fetchUsers();
         }
 
-        async function editMember(id, oldName) {
-            const newName = prompt("Edit:", oldName);
-            if(newName) { await supabaseClient.from('river_members').update({ name: newName }).eq('id', id); fetchUsers(); }
+        async function editMember(id, old) {
+            const n = prompt("Edit:", old);
+            if(n) { await supabaseClient.from('river_members').update({ name: n }).eq('id', id); fetchUsers(); }
         }
         async function deleteMember(id) {
             if(confirm("Delete?")) { await supabaseClient.from('river_members').delete().eq('id', id); fetchUsers(); }
-        }
-
-        async function addDailyLogToDB() {
-            const mId = document.getElementById('managerId').value;
-            const qty = document.getElementById('dailyPtsInput').value;
-            if(!mId || !qty) return;
-            await supabaseClient.from('river_daily_logs').insert([{ manager_id: mId, amount: parseInt(qty) }]);
-            document.getElementById('dailyPtsInput').value = ''; fetchDailyLogs();
-        }
-        async function editLog(id, oldVal) {
-            const newVal = prompt("Edit:", oldVal);
-            if(newVal !== null && newVal !== "") { await supabaseClient.from('river_daily_logs').update({ amount: parseInt(newVal) }).eq('id', id); fetchDailyLogs(); }
-        }
-        async function deleteLog(id) {
-            if(confirm("Delete?")) { await supabaseClient.from('river_daily_logs').delete().eq('id', id); fetchDailyLogs(); }
-        }
-        async function fetchDailyLogs() {
-            const mId = document.getElementById('managerId').value;
-            if(!mId) return;
-            const { data } = await supabaseClient.from('river_daily_logs').select('*').eq('manager_id', mId).order('created_at', { ascending: false }).limit(10);
-            const list = document.getElementById('dailyLogList');
-            list.innerHTML = (data || []).map(l => {
-                const d = new Date(l.created_at);
-                return `<div class="log-row"><div>🗓️ ${d.getMonth()+1}/${d.getDate()} <span class="font-bold text-indigo-400 ml-2">${l.amount.toLocaleString()} Pts</span></div><div class="flex gap-4"><span onclick="editLog(${l.id}, ${l.amount})" class="btn-icon">✏️</span><span onclick="deleteLog(${l.id})" class="btn-icon">❌</span></div></div>`;
-            }).join('');
         }
 
         async function fetchUsers() {
@@ -236,32 +288,32 @@
         function renderTable() {
             const body = document.getElementById('userTableBody'); body.innerHTML = '';
             const start = (currentPage - 1) * itemsPerPage;
-            const pageData = allUsers.slice(start, start + itemsPerPage);
-            pageData.forEach((u, i) => {
-                const globalIdx = start + i;
-                const twitterLink = u.x_id ? `<span class="member-link" onclick="window.open('https://x.com/${u.x_id}', '_blank')">${u.name}</span>` : `<span>${u.name}</span>`;
-                body.innerHTML += `<tr><td class="p-4 flex justify-between items-center"><div><span class="text-indigo-400 font-black mr-2">#${globalIdx + 1}</span><strong>${twitterLink}</strong></div><div class="flex gap-4 text-xl"><span onclick="moveMember(${globalIdx}, -1)" class="btn-icon text-blue-400">🔼</span><span onclick="moveMember(${globalIdx}, 1)" class="btn-icon text-blue-400">🔽</span><span onclick="editMember(${u.id}, '${u.name}')" class="btn-icon text-orange-400 text-sm">✏️</span><span onclick="deleteMember(${u.id})" class="btn-icon text-red-500 text-sm">❌</span></div></td></tr>`;
+            const pData = allUsers.slice(start, start + itemsPerPage);
+            pData.forEach((u, i) => {
+                const gIdx = start + i;
+                const link = u.x_id ? `<span class="member-link" onclick="window.open('https://x.com/${u.x_id}', '_blank')">${u.name}</span>` : `<span>${u.name}</span>`;
+                body.innerHTML += `<tr><td class="p-4 flex justify-between items-center"><div><span class="text-indigo-400 font-black mr-2">#${gIdx+1}</span><strong>${link}</strong></div><div class="flex gap-4 text-xl"><span onclick="moveMember(${gIdx}, -1)" class="btn-icon text-blue-400">🔼</span><span onclick="moveMember(${gIdx}, 1)" class="btn-icon text-blue-400">🔽</span><span onclick="editMember(${u.id}, '${u.name}')" class="btn-icon text-orange-400 text-sm">✏️</span><span onclick="deleteMember(${u.id})" class="btn-icon text-red-500 text-sm">❌</span></div></td></tr>`;
             });
             renderPagination();
         }
 
         function renderPagination() {
             const div = document.getElementById('pagination'); div.innerHTML = '';
-            const totalPages = Math.ceil(allUsers.length / itemsPerPage);
-            if (totalPages <= 1) return;
-            for (let i = 1; i <= totalPages; i++) {
+            const totalP = Math.ceil(allUsers.length / itemsPerPage);
+            if (totalP <= 1) return;
+            for (let i = 1; i <= totalP; i++) {
                 const btn = document.createElement('button');
                 btn.innerText = i; btn.className = `page-btn ${currentPage === i ? 'active' : ''} mx-1`;
                 btn.onclick = () => { currentPage = i; renderTable(); }; div.appendChild(btn);
             }
         }
 
+        // 🌐 번역 변경 함수 보강: 모든 요소 타겟팅
         function changeLanguage(lang) {
             currentLang = lang; const t = translations[lang] || translations.ko;
             document.getElementById('main-title').innerText = t.title;
             document.getElementById('btnConnect').innerText = t.connect;
             document.getElementById('btnLogAdd').innerText = t.logBtn;
-            document.getElementById('dailyPtsInput').placeholder = t.logPlace;
             document.getElementById('lbl-mypts').innerText = t.mypts;
             document.getElementById('lbl-ptsprice').innerText = t.ptsprice;
             document.getElementById('lbl-value').innerText = t.value;
@@ -269,6 +321,9 @@
             document.getElementById('newMemberName').placeholder = t.xName;
             document.getElementById('newMemberXId').placeholder = t.xId;
             document.getElementById('btnAddMember').innerText = t.addBtn;
+            document.getElementById('btnDevLink').innerText = t.devBtn;
+            document.getElementById('btnRiverLink').innerText = t.riverBtn;
+            document.getElementById('dailyPtsInput').placeholder = t.logPlace;
             fetchDailyLogs();
         }
 
@@ -283,9 +338,7 @@
             updateMarketData(); setInterval(updateMarketData, 60000);
             const savedId = localStorage.getItem('river_manager_id');
             if(savedId) document.getElementById('managerId').value = savedId;
-            changeLanguage(currentLang);
-            if(savedId) { fetchUsers(); fetchDailyLogs(); }
-            switchCountry('KR');
+            changeLanguage('ko'); switchCountry('KR');
             setInterval(() => {
                 const html = Object.keys(timeZones).map(code => {
                     const time = new Date().toLocaleTimeString('en-US', { timeZone: timeZones[code], hour: '2-digit', minute: '2-digit', hour12: false });
